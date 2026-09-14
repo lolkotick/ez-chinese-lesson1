@@ -56,7 +56,8 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
     setCurrentIndex(0);
     setIsFlipped(false);
     setPeekPinyin(false);
-  }, [settings.selectedChunk, filterProblematic, progress]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings.selectedChunk, filterProblematic]);
 
   const currentWord: WordItem | undefined = deck[currentIndex];
   const currentProgress = currentWord ? progress[currentWord.id] : undefined;
@@ -76,24 +77,16 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
   }, [onIncrementFlipped]);
 
   const handleNext = useCallback(() => {
-    if (currentIndex < deck.length - 1) {
-      setCurrentIndex(prev => prev + 1);
-    } else {
-      setCurrentIndex(0);
-    }
+    setCurrentIndex(prev => (prev < deck.length - 1 ? prev + 1 : 0));
     setIsFlipped(false);
     setPeekPinyin(false);
-  }, [currentIndex, deck.length]);
+  }, [deck.length]);
 
   const handlePrev = useCallback(() => {
-    if (currentIndex > 0) {
-      setCurrentIndex(prev => prev - 1);
-    } else {
-      setCurrentIndex(deck.length - 1);
-    }
+    setCurrentIndex(prev => (prev > 0 ? prev - 1 : Math.max(0, deck.length - 1)));
     setIsFlipped(false);
     setPeekPinyin(false);
-  }, [currentIndex, deck.length]);
+  }, [deck.length]);
 
   const handleRate = useCallback((level: MasteryLevel) => {
     if (!currentWord) return;
