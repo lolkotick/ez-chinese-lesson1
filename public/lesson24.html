@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Урок 24: Полная база (127 слов + 17 терминов)</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --card-hover: #334155;
+      --accent: #ef4444;
+      --gold: #f59e0b;
+      --green: #10b981;
+      --blue: #3b82f6;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+    body { background: var(--bg); color: var(--text); line-height: 1.5; padding-bottom: 60px; }
+    
+    .city-banner {
+      background: linear-gradient(135deg, #1e1b4b, #0f172a);
+      border-bottom: 2px solid #334155;
+      padding: 18px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+    .city-header {
+      max-width: 1150px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+    }
+    .era-badge { display: flex; align-items: center; gap: 12px; }
+    .era-year {
+      font-size: 1.9rem;
+      font-weight: 900;
+      color: var(--gold);
+      background: rgba(245, 158, 11, 0.15);
+      padding: 4px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--gold);
+    }
+    .city-visual {
+      font-size: 1.7rem;
+      letter-spacing: 6px;
+      background: rgba(255,255,255,0.05);
+      padding: 8px 16px;
+      border-radius: 12px;
+    }
+    .stats-bar { display: flex; gap: 20px; align-items: center; }
+    .stat-item { text-align: right; }
+    .stat-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; }
+    .stat-val { font-size: 1.15rem; font-weight: 700; color: var(--green); }
+    
+    .progress-wrap {
+      max-width: 1150px;
+      margin: 12px auto 0;
+      background: #334155;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--gold), var(--green));
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    .container { max-width: 1150px; margin: 24px auto; padding: 0 16px; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+    .tab-btn {
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid #334155;
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+    .tab-btn:hover { background: var(--card-hover); }
+    .tab-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; align-items: center; }
+    .search-input, .filter-select {
+      background: var(--card);
+      border: 1px solid #475569;
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.92rem;
+    }
+    .search-input { flex: 1; min-width: 220px; }
+    
+    .word-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(265px, 1fr));
+      gap: 14px;
+    }
+    .word-card {
+      background: var(--card);
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 16px;
+      transition: 0.2s;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .word-card:hover { transform: translateY(-3px); border-color: var(--gold); }
+    .word-card.learned { border-color: var(--green); background: rgba(16, 185, 129, 0.08); }
+    .hanzi { font-size: 1.55rem; font-weight: 700; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .pinyin { color: var(--gold); font-size: 0.95rem; font-weight: 500; margin-bottom: 6px; }
+    .pos-tag { font-size: 0.7rem; background: #334155; color: #cbd5e1; padding: 2px 7px; border-radius: 6px; white-space: nowrap; }
+    .cat-tag { font-size: 0.68rem; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 6px; font-weight: 600; }
+    .cat-main { background: rgba(59,130,246,0.2); color: #93c5fd; }
+    .cat-refill { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+    .cat-notes { background: rgba(245,158,11,0.2); color: #fcd34d; }
+    .cat-extra { background: rgba(236,72,153,0.2); color: #f9a8d4; }
+    .cat-terms { background: rgba(168,85,247,0.2); color: #d8b4fe; }
+
+    .meaning { font-size: 0.93rem; color: #e2e8f0; margin-bottom: 8px; }
+    .note-box { font-size: 0.78rem; color: var(--muted); background: rgba(0,0,0,0.25); padding: 7px; border-radius: 6px; border-left: 3px solid var(--blue); margin-top: 6px; }
+    .card-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 10px; border-top: 1px solid #334155; }
+    .btn-small {
+      background: #334155;
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.78rem;
+    }
+    .btn-small:hover { background: #475569; }
+    .btn-learn.learned { background: var(--green); }
+
+    .game-box {
+      background: var(--card);
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 26px;
+      max-width: 780px;
+      margin: 0 auto 24px;
+      text-align: center;
+    }
+    .game-title { font-size: 1.35rem; margin-bottom: 8px; color: var(--gold); }
+    .game-sub { color: var(--muted); margin-bottom: 20px; font-size: 0.92rem; }
+    .big-prompt { font-size: 1.8rem; font-weight: 800; margin: 18px 0; color: white; }
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .opt-btn {
+      background: #0f172a;
+      border: 2px solid #334155;
+      color: var(--text);
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 1.15rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .opt-btn:hover { border-color: var(--blue); background: #1e293b; }
+    .opt-btn.correct { border-color: var(--green); background: rgba(16,185,129,0.2); }
+    .opt-btn.wrong { border-color: var(--accent); background: rgba(239,68,68,0.2); }
+    .feedback { margin-top: 16px; font-weight: 600; min-height: 28px; }
+
+    .lihe-slot {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 2.3rem;
+      font-weight: 800;
+      background: #0f172a;
+      padding: 12px 26px;
+      border-radius: 14px;
+      margin: 14px 0;
+      border: 1px dashed var(--gold);
+    }
+    .insert-zone { color: var(--gold); border-bottom: 3px solid var(--gold); min-width: 60px; padding: 0 8px; }
+
+    .blind-mode .meaning, .blind-mode .pinyin { filter: blur(6px); transition: 0.2s; }
+    .blind-mode .word-card:hover .meaning, .blind-mode .word-card:hover .pinyin { filter: blur(0); }
+  </style>
+</head>
+<body>
+
+  <div class="city-banner">
+    <div class="city-header">
+      <div class="era-badge">
+        <a href="./" style="text-decoration: none; color: #f8fafc; font-size: 0.82rem; background: #334155; padding: 6px 12px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; border: 1px solid #475569;" title="Вернуться к Уроку 1">← Урок 1</a>
+        <div class="era-year" id="eraYear">1978</div>
+        <div>
+          <div style="font-weight:700; font-size:1.05rem;" id="eraTitle">Эпоха до реформ (改革开放以前)</div>
+          <div style="font-size:0.82rem; color:var(--muted);" id="eraDesc">127 слов + 17 терминов — прокачай страну от 平房 до 高铁!</div>
+        </div>
+      </div>
+      <div class="city-visual" id="cityVisual" title="Облик города (城市面貌)">🏚️🚲🌾👕</div>
+      <div class="stats-bar">
+        <div class="stat-item">
+          <div class="stat-label">Освоено (127 слов + 17 терм.)</div>
+          <div class="stat-val"><span id="learnedCount">0</span> / 144</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Рост ВВП (GDP)</div>
+          <div class="stat-val" id="gdpScore">+0.0%</div>
+        </div>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-fill" id="progressBar"></div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="tabs" id="mainTabs">
+      <button class="tab-btn active" data-tab="dict">📚 Полная база (144)</button>
+      <button class="tab-btn" data-tab="era">⏳ Блиц-тренажёр (по блокам)</button>
+      <button class="tab-btn" data-tab="traps">🕵️ 27 ловушек РТ 2.3</button>
+      <button class="tab-btn" data-tab="lihe">✂️ Хирургия 离合词</button>
+      <button class="tab-btn" data-tab="bei">📈 Кратность 倍 и Тоны</button>
+    </div>
+
+    <!-- СЕКЦИЯ 1: ПОЛНАЯ БАЗА 144 ЕДИНИЦЫ -->
+    <div id="sec-dict" class="section active">
+      <div class="controls">
+        <input type="text" id="searchInput" class="search-input" placeholder="Поиск по иероглифу, пиньиню или переводу...">
+        <select id="filterSelect" class="filter-select">
+          <option value="all">Все 144 (127 слов + 17 терминов)</option>
+          <option value="main">1. Основной словарь (80 слов)</option>
+          <option value="refill">2. Лексическая дозаправка (16 слов)</option>
+          <option value="notes">3. Сноски урока (9 слов)</option>
+          <option value="extra">4. Из текстов вне словаря (22 слова)</option>
+          <option value="terms">5. Термины «Знаете ли вы» (17 терминов)</option>
+          <option value="unlearned">Невыученные</option>
+          <option value="learned">Выученные ✓</option>
+          <option value="keys">С разбором ключей и ловушек</option>
+        </select>
+        <button class="tab-btn" id="blindBtn">👁️ Скрыть перевод/пиньинь</button>
+      </div>
+      <div id="countInfo" style="font-size:0.85rem; color:var(--muted); margin-bottom:12px;"></div>
+      <div class="word-grid" id="wordGrid"></div>
+    </div>
+
+    <!-- СЕКЦИЯ 2: БЛИЦ-ТРЕНАЖЁР -->
+    <div id="sec-era" class="section">
+      <div class="game-box">
+        <div class="game-title">⏳ Машина времени: Блиц по всем 144 карточкам</div>
+        <div style="margin-bottom:15px;">
+          <select id="quizPoolSelect" class="filter-select">
+            <option value="all">Все 144 (127 слов + 17 терминов)</option>
+            <option value="main">Только основной словарь (80)</option>
+            <option value="refill">Только «Лексическая дозаправка» (16)</option>
+            <option value="notes">Только сноски (9)</option>
+            <option value="extra">Только слова вне словаря (22)</option>
+            <option value="terms">Только термины «Знаете ли вы» (17)</option>
+          </select>
+        </div>
+        <div id="quizPrompt" class="big-prompt"></div>
+        <div id="quizSub" style="color:var(--muted); margin-bottom:15px;"></div>
+        <div id="quizOptions" class="options-grid"></div>
+        <div id="quizFeedback" class="feedback"></div>
+        <button class="tab-btn" style="margin-top:16px;" id="nextQuizBtn">Дальше →</button>
+      </div>
+    </div>
+
+    <!-- СЕКЦИЯ 3: ВСЕ 27 ПАР РТ 2.3 -->
+    <div id="sec-traps" class="section">
+      <div class="game-box">
+        <div class="game-title">🕵️ Сканер фальшивок: все 27 пар из РТ 2.3</div>
+        <div class="game-sub">Выбери правильный иероглиф и не попадись на двойника (<span id="trapCounter">1 / 27</span>)</div>
+        <div id="trapMeaning" style="font-size:1.3rem; margin:15px 0; color:var(--text);"></div>
+        <div id="trapOptions" class="options-grid"></div>
+        <div id="trapFeedback" class="feedback"></div>
+        <button class="tab-btn" style="margin-top:16px;" id="nextTrapBtn">Следующая пара →</button>
+      </div>
+    </div>
+
+    <!-- СЕКЦИЯ 4: ХИРУРГИЯ 离合词 -->
+    <div id="sec-lihe" class="section">
+      <div class="game-box">
+        <div class="game-title">✂️ Хирургия разделяемых слов (离合词)</div>
+        <div class="game-sub">Разделяемые глаголы урока: <b>住院, 出院, 出国, 贷款, 购物</b></div>
+        <div id="liheTask" style="font-size:1.2rem; margin-bottom:10px;"></div>
+        <div class="lihe-slot" id="liheVisual"></div>
+        <div id="liheOptions" class="options-grid"></div>
+        <div id="liheFeedback" class="feedback"></div>
+        <button class="tab-btn" style="margin-top:16px;" id="nextLiheBtn">Следующая операция →</button>
+      </div>
+    </div>
+
+    <!-- СЕКЦИЯ 5: КРАТНОСТЬ 倍 И ТОНЫ -->
+    <div id="sec-bei" class="section">
+      <div class="game-box">
+        <div class="game-title">📈 Ловушка кратности (倍), процентов и тонов</div>
+        <div class="game-sub">Проверка самых коварных мест грамматики и фонетики 24 урока</div>
+        <div id="beiPrompt" class="big-prompt" style="font-size:1.6rem;"></div>
+        <div id="beiOptions" class="options-grid"></div>
+        <div id="beiFeedback" class="feedback"></div>
+        <button class="tab-btn" style="margin-top:16px;" id="nextBeiBtn">Следующий вопрос →</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+// Безопасное хранилище (не падает на file://)
+function safeGet(key, fallback) {
+  try {
+    const val = window.localStorage.getItem(key);
+    return val !== null ? JSON.parse(val) : fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+function safeSet(key, val) {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(val));
+  } catch (e) {}
+}
+
+const words = [
+  // 1. ОСНОВНОЙ СЛОВАРЬ (1–80)
+  {id:1, cat:"main", hz:"过去", py:"guòqù", pos:"名", ru:"прошлое; в прошлом", ex:"小陈比过去胖多了。"},
+  {id:2, cat:"main", hz:"发展", py:"fāzhǎn", pos:"动/名", ru:"развивать(ся); развитие", ex:"这家小商店三年内发展成大公司了。", key:"展 zhǎn — развёртывать(ся)"},
+  {id:3, cat:"main", hz:"汽车", py:"qìchē", pos:"名", ru:"автомобиль (сч. сл. 辆)", ex:"路上汽车真多，一辆接一辆的。", key:"汽 qì — пар; 辆 = 车 + 两"},
+  {id:4, cat:"main", hz:"接", py:"jiē", pos:"动", ru:"сменять; один за другим", ex:"最近太忙了，事情一件接一件的。"},
+  {id:5, cat:"main", hz:"难免", py:"nánmiǎn", pos:"形", ru:"неизбежный; неизбежно", ex:"刚开始学习汉语，难免会说错一些句子。", key:"免 miǎn — избегать"},
+  {id:6, cat:"main", hz:"成语", py:"chéngyǔ", pos:"名", ru:"чэнъюй (идиома из 4 иероглифов)", ex:"不过你想用成语表达了。"},
+  {id:7, cat:"main", hz:"车水马龙", py:"chēshuǐmǎlóng", pos:"成语", ru:"оживлённое движение (НЕ пробка!)", ex:"我们学校东门前真是车水马龙。", key:"龙 lóng — дракон (полн. 龍)"},
+  {id:8, cat:"main", hz:"情况", py:"qíngkuàng", pos:"名", ru:"ситуация, обстоятельства", ex:"请您给我们介绍介绍中国现在的经济情况。"},
+  {id:9, cat:"main", hz:"来往", py:"láiwǎng", pos:"动", ru:"ходить туда-сюда; поддерживать связи", ex:"大街上来来往往的人很多。"},
+  {id:10, cat:"main", hz:"主要", py:"zhǔyào", pos:"形", ru:"главный, основной; в основном", ex:"昨天的会议上我们主要谈了两个问题。"},
+  {id:11, cat:"main", hz:"表达", py:"biǎodá", pos:"动", ru:"выражать, передавать", ex:"中国人表达感情的方式和西方人不太一样。"},
+  {id:12, cat:"main", hz:"看来", py:"kànlái", pos:"动", ru:"по-видимому, судя по всему", ex:"看来，这事儿不好办。"},
+  {id:13, cat:"main", hz:"水平", py:"shuǐpíng", pos:"名", ru:"уровень", ex:"提高生活水平 / 他们的汉语水平差不多。"},
+  {id:14, cat:"main", hz:"马马虎虎", py:"mǎmǎhūhū", pos:"形", ru:"небрежно, кое-как; так себе", ex:"安全检查不能马马虎虎。", key:"Во 2-й половине 1-й тон (hūhū)!"},
+  {id:15, cat:"main", hz:"谦虚", py:"qiānxū", pos:"形/动", ru:"скромный; скромничать", ex:"谦虚可是中国的传统美德啊！", key:"谦 = 讠+兼 (полн. 謙); 虚 = 虍+业 (полн. 虛)"},
+  {id:16, cat:"main", hz:"美德", py:"měidé", pos:"名", ru:"добродетель", ex:"学习中国人的传统美德。"},
+  {id:17, cat:"main", hz:"入乡随俗", py:"rù xiāng suí sú", pos:"成语", ru:"в чужой монастырь со своим уставом не ходят", ex:"入乡随俗嘛！"},
+  {id:18, cat:"main", hz:"整个", py:"zhěnggè", pos:"形", ru:"целый, весь; целиком", ex:"那时候，整个城市也看不到几辆车。"},
+  {id:19, cat:"main", hz:"普通", py:"pǔtōng", pos:"形", ru:"обычный, общий", ex:"我只想做个普通人，过普普通通的生活。"},
+  {id:20, cat:"main", hz:"连…都/也", py:"lián…dōu/yě", pos:"констр.", ru:"даже… и то", ex:"香蕉不能连皮吃。", key:"连 = 车 + 辶 (полн. 連)"},
+  {id:21, cat:"main", hz:"爱人", py:"àiren", pos:"名", ru:"муж, жена", ex:"连我爱人生孩子住院、出院都用自行车。", key:"Лёгкий тон во 2-м слоге: àiren"},
+  {id:22, cat:"main", hz:"生", py:"shēng", pos:"动", ru:"рожать; родиться", ex:"江老师生于一九六五年。"},
+  {id:23, cat:"main", hz:"孩子", py:"háizi", pos:"名", ru:"ребёнок", ex:"王老师的几个孩子都很用功。", key:"Лёгкий тон: háizi"},
+  {id:24, cat:"main", hz:"住院", py:"zhù//yuàn", pos:"动 (разд.)", ru:"лежать / лечь в больницу", ex:"我得了胃病住过一次院。"},
+  {id:25, cat:"main", hz:"出院", py:"chū//yuàn", pos:"动 (разд.)", ru:"выписаться из больницы", ex:"连我爱人生孩子住院、出院都用自行车。"},
+  {id:26, cat:"main", hz:"自行车", py:"zìxíngchē", pos:"名", ru:"велосипед", ex:"普通人家里有一辆自行车就不错了。"},
+  {id:27, cat:"main", hz:"幸福", py:"xìngfú", pos:"形/名", ru:"счастливый; счастье", ex:"生活比我年轻的时候幸福多了。", key:"福 = 礻(алтарь) + 畐"},
+  {id:28, cat:"main", hz:"忆苦思甜", py:"yì kǔ sī tián", pos:"成语", ru:"вспоминая прежние горести, думать о радостях настоящего", ex:"张老师是忆苦思甜哪！", key:"忆 = 忄+ 乙 (полн. 憶)"},
+  {id:29, cat:"main", hz:"十分", py:"shífēn", pos:"副", ru:"весьма, очень", ex:"这个问题十分复杂。"},
+  {id:30, cat:"main", hz:"迅速", py:"xùnsù", pos:"形", ru:"стремительный", ex:"俄罗斯高等教育发展得十分迅速。", key:"迅 (卂+辶) и 速 (束+辶)"},
+  {id:31, cat:"main", hz:"党", py:"dǎng", pos:"名", ru:"партия (обычно КПК)", ex:"都是党和国家的改革开放政策带来的好处。", key:"党 = ⺌+冖+兄 (полн. 黨)"},
+  {id:32, cat:"main", hz:"改革开放", py:"gǎigé kāifàng", pos:"выраж.", ru:"реформы и открытость", ex:"对国内改革，对国外开放的经济政策。", key:"革 gé — кожа; менять"},
+  {id:33, cat:"main", hz:"政策", py:"zhèngcè", pos:"名", ru:"политический курс", ex:"上面有政策，下面有对策。", key:"政 = 正+攵; 策 = ⺮+朿"},
+  {id:34, cat:"main", hz:"经济", py:"jīngjì", pos:"名", ru:"экономика", ex:"中国的经济不断增长。", key:"济 = 氵+ 齐 (полн. 濟)"},
+  {id:35, cat:"main", hz:"出生", py:"chūshēng", pos:"动", ru:"родиться", ex:"我爷爷1931年出生于莫斯科。"},
+  {id:36, cat:"main", hz:"完全", py:"wánquán", pos:"形/副", ru:"полный; полностью", ex:"这两所大学的教学条件完全一样。"},
+  {id:37, cat:"main", hz:"落后", py:"luòhòu", pos:"形", ru:"отсталый", ex:"改革开放以前，中国的经济比较落后。", key:"Чтение: luòhòu"},
+  {id:38, cat:"main", hz:"之后", py:"zhīhòu", pos:"относит.", ru:"после, после того как", ex:"大学毕业之后，他去了北京。"},
+  {id:39, cat:"main", hz:"面貌", py:"miànmào", pos:"名", ru:"облик, наружность", ex:"改革开放改变了中国贫穷落后的面貌。", key:"貌 = 豸 + 皃 (не путать с кошкой 猫!)"},
+  {id:40, cat:"main", hz:"改变", py:"gǎibiàn", pos:"动", ru:"изменять, преобразовывать", ex:"我觉得你要改变一下你的学习习惯。"},
+  {id:41, cat:"main", hz:"建", py:"jiàn", pos:"动", ru:"строить; основывать", ex:"建国 / 我们家附近要建一座体育馆。"},
+  {id:42, cat:"main", hz:"高铁", py:"gāotiě", pos:"名", ru:"высокоскоростная магистраль (高速铁路)", ex:"新建了很多高楼、公路、立交桥、高铁。"},
+  {id:43, cat:"main", hz:"富强", py:"fùqiáng", pos:"形", ru:"могучий и процветающий (о государстве)", ex:"富国强兵 / 国家富强，人民安乐。", key:"富 = 宀 (крыша) + 畐"},
+  {id:44, cat:"main", hz:"不仅", py:"bùjǐn", pos:"连", ru:"не только", ex:"安德烈不仅汉语学得好，而且历史也学得特别好。", key:"仅 = 亻+ 又 (полн. 僅); bùjǐn"},
+  {id:45, cat:"main", hz:"巨大", py:"jùdà", pos:"形", ru:"огромный", ex:"莫斯科人口多，是一个巨大的消费市场。"},
+  {id:46, cat:"main", hz:"平房", py:"píngfáng", pos:"名", ru:"одноэтажный дом", ex:"他家住平房，我们住楼房。"},
+  {id:47, cat:"main", hz:"出国", py:"chū//guó", pos:"动 (разд.)", ru:"выезжать за границу", ex:"现在出国旅游都很平常。"},
+  {id:48, cat:"main", hz:"平常", py:"píngcháng", pos:"形/名", ru:"обычный; обычно", ex:"这个词儿平常很少用。"},
+  {id:49, cat:"main", hz:"发生", py:"fāshēng", pos:"动", ru:"возникать, случаться", ex:"娜斯佳的生活环境发生了很大的变化。"},
+  {id:50, cat:"main", hz:"不断", py:"búduàn", pos:"副", ru:"непрерывно", ex:"不断努力 / 不断进步", key:"Читается со 2-м тоном: búduàn!"},
+  {id:51, cat:"main", hz:"断", py:"duàn", pos:"动", ru:"ломать(ся); прерывать", ex:"морфема к № 50 (不断)", key:"Справа 斤 «топор» (полн. 斷)"},
+  {id:52, cat:"main", hz:"增长", py:"zēngzhǎng", pos:"动", ru:"расти, увеличиваться", ex:"广告业是世界上增长最快的行业之一。", key:"增 = 土 + 曾"},
+  {id:53, cat:"main", hz:"比如", py:"bǐrú", pos:"动", ru:"например", ex:"他想学很多东西，比如用电脑、开汽车等。"},
+  {id:54, cat:"main", hz:"GDP", py:"guómín shēngchǎn zǒngzhí", pos:"名", ru:"ВВП (国民生产总值)", ex:"今年中国GDP比去年增长了7%。"},
+  {id:55, cat:"main", hz:"提高", py:"tígāo", pos:"动", ru:"поднимать, повышать", ex:"最近这家工厂的产量提高了两倍多。"},
+  {id:56, cat:"main", hz:"倍", py:"bèi", pos:"量", ru:"раз, крат", ex:"这种墨水比普通墨水贵一倍。", key:"倍 = 亻 + 咅"},
+  {id:57, cat:"main", hz:"观念", py:"guānniàn", pos:"名", ru:"идея, взгляд, представление", ex:"中国人的家庭观念很强。"},
+  {id:58, cat:"main", hz:"总是", py:"zǒngshì", pos:"副", ru:"всегда, постоянно", ex:"一到冬天他总是感冒。", key:"总 = 丷+口+心 (полн. 總)"},
+  {id:59, cat:"main", hz:"省", py:"shěng", pos:"动", ru:"экономить", ex:"省时间 / 省力 / 这样可以省不少麻烦。"},
+  {id:60, cat:"main", hz:"贷款", py:"dài//kuǎn", pos:"动/名 (разд.)", ru:"давать/брать кредит; кредит", ex:"他买房子贷了不少款。", key:"贷 = 代 + 贝 (полн. 貸)"},
+  {id:61, cat:"main", hz:"敢", py:"gǎn", pos:"助动", ru:"сметь, осмеливаться", ex:"他是个敢想敢做的人。"},
+  {id:62, cat:"main", hz:"想象", py:"xiǎngxiàng", pos:"动/名", ru:"воображать; воображение", ex:"他的想象力很强。"},
+  {id:63, cat:"main", hz:"事情", py:"shìqing", pos:"名", ru:"дело, обстоятельство", ex:"她有许多事情要办。", key:"Лёгкий тон: shìqing"},
+  {id:64, cat:"main", hz:"家常便饭", py:"jiā cháng biàn fàn", pos:"成语", ru:"простой домашний обед; обычное дело", ex:"他太忙了，加班加点是家常便饭。"},
+  {id:65, cat:"main", hz:"度", py:"dù", pos:"动", ru:"проводить (время)", ex:"欢度春节 / 我希望和你共度一生。"},
+  {id:66, cat:"main", hz:"蜜月", py:"mìyuè", pos:"名", ru:"медовый месяц", ex:"出国旅游，度蜜月等等。", key:"蜜 = 宓 + 虫 (пчела)"},
+  {id:67, cat:"main", hz:"差不多", py:"chàbuduō", pos:"副/形", ru:"почти одинаковый; почти", ex:"钱差不多花光了。"},
+  {id:68, cat:"main", hz:"颜色", py:"yánsè", pos:"名", ru:"цвет", ex:"他的衣服是什么颜色的？", key:"颜 = 彦 + 页 (полн. 顏)"},
+  {id:69, cat:"main", hz:"单一", py:"dānyī", pos:"形", ru:"единый; однообразный", ex:"孩子的思想比较单一。"},
+  {id:70, cat:"main", hz:"样式", py:"yàngshì", pos:"名", ru:"фасон, образец", ex:"那家服装店的服装样式多，价格不贵。"},
+  {id:71, cat:"main", hz:"单调", py:"dāndiào", pos:"形", ru:"монотонный, однообразный", ex:"这么单调的工作我不想干。"},
+  {id:72, cat:"main", hz:"时尚", py:"shíshàng", pos:"形/名", ru:"мода; модный", ex:"我觉得，时尚是一种生活方式。"},
+  {id:73, cat:"main", hz:"外国", py:"wàiguó", pos:"名", ru:"заграница; иностранный", ex:"年年有很多中国人去外国留学。"},
+  {id:74, cat:"main", hz:"老外", py:"lǎowài", pos:"名", ru:"иностранец; приезжий (разг.)", ex:"见到街上的老外已经是见怪不怪了。"},
+  {id:75, cat:"main", hz:"见怪不怪", py:"jiàn guài bú guài", pos:"成语", ru:"ничему не удивляться, владеть собой", ex:"对飞机晚点的情况已经见怪不怪了。"},
+  {id:76, cat:"main", hz:"观光", py:"guānguāng", pos:"动", ru:"осматривать достопримечательности", ex:"今年暑假安娜去中国各地观光了一趟。"},
+  {id:77, cat:"main", hz:"购物", py:"gòu//wù", pos:"动 (разд.)", ru:"делать покупки, шопинг", ex:"购物车 — тележка", key:"购 = 贝 + 勾 (полн. 購)"},
+  {id:78, cat:"main", hz:"发展中国家", py:"fāzhǎn zhōng guójiā", pos:"выраж.", ru:"развивающаяся страна (发展中 | 国家)", ex:"中国虽然现在还是发展中国家…"},
+  {id:79, cat:"main", hz:"发达国家", py:"fādá guójiā", pos:"выраж.", ru:"развитая страна (发达 — развитой)", ex:"莫斯科的交通很发达。"},
+  {id:80, cat:"main", hz:"距离", py:"jùlí", pos:"名", ru:"расстояние", ex:"北京到上海的铁路距离是1463公里。", key:"距 = ⻊ + 巨"},
+
+  // 2. ЛЕКСИЧЕСКАЯ ДОЗАПРАВКА (81–96)
+  {id:81, cat:"refill", hz:"老百姓", py:"lǎobǎixìng", pos:"дозапр.", ru:"(простой) народ, простые люди"},
+  {id:82, cat:"refill", hz:"农村", py:"nóngcūn", pos:"дозапр.", ru:"деревня, село"},
+  {id:83, cat:"refill", hz:"速度", py:"sùdù", pos:"дозапр.", ru:"скорость"},
+  {id:84, cat:"refill", hz:"政治", py:"zhèngzhì", pos:"дозапр.", ru:"политика (в общем смысле)", key:"政治人物, но 经济政策 (К.6)"},
+  {id:85, cat:"refill", hz:"工资", py:"gōngzī", pos:"дозапр.", ru:"зарплата"},
+  {id:86, cat:"refill", hz:"专家", py:"zhuānjiā", pos:"дозапр.", ru:"специалист"},
+  {id:87, cat:"refill", hz:"结果", py:"jiéguǒ", pos:"дозапр.", ru:"результат, итог"},
+  {id:88, cat:"refill", hz:"以上", py:"yǐshàng", pos:"дозапр.", ru:"выше, больше (50%以上)"},
+  {id:89, cat:"refill", hz:"以下", py:"yǐxià", pos:"дозапр.", ru:"ниже, меньше (30岁以下)"},
+  {id:90, cat:"refill", hz:"丰富", py:"fēngfù", pos:"дозапр.", ru:"богатый, обильный"},
+  {id:91, cat:"refill", hz:"生产量 / 产量", py:"shēngchǎnliàng / chǎnliàng", pos:"дозапр.", ru:"объём производства"},
+  {id:92, cat:"refill", hz:"成绩", py:"chéngjì", pos:"дозапр.", ru:"успехи, достижения"},
+  {id:93, cat:"refill", hz:"影响", py:"yǐngxiǎng", pos:"дозапр.", ru:"влиять; влияние"},
+  {id:94, cat:"refill", hz:"随着", py:"suízhe", pos:"дозапр.", ru:"по мере; вслед за (предлог)"},
+  {id:95, cat:"refill", hz:"厘米", py:"límǐ", pos:"дозапр.", ru:"сантиметр"},
+  {id:96, cat:"refill", hz:"调查", py:"diàochá", pos:"дозапр.", ru:"обследовать, исследовать"},
+
+  // 3. СНОСКИ В СЛОВАРЕ И ГРАММАТИКЕ (97–105)
+  {id:97, cat:"notes", hz:"消费", py:"xiāofèi", pos:"сноска", ru:"потреблять, расходовать (к слову 45)"},
+  {id:98, cat:"notes", hz:"生产", py:"shēngchǎn", pos:"сноска", ru:"производить (к слову 54)"},
+  {id:99, cat:"notes", hz:"产量", py:"chǎnliàng", pos:"сноска", ru:"объём производства (к слову 55)"},
+  {id:100, cat:"notes", hz:"奖金", py:"jiǎngjīn", pos:"сноска", ru:"бонус, премия (ГРАМ.5)"},
+  {id:101, cat:"notes", hz:"犯（错误）", py:"fàn (cuòwù)", pos:"сноска", ru:"совершить (ошибку) (ГРАМ.1)", ex:"工作中，难免会犯一些错误。"},
+  {id:102, cat:"notes", hz:"会议", py:"huìyì", pos:"сноска", ru:"собрание, заседание (ГРАМ.1)"},
+  {id:103, cat:"notes", hz:"迟", py:"chí", pos:"сноска", ru:"поздний, позже (ГРАМ.1)"},
+  {id:104, cat:"notes", hz:"占", py:"zhàn", pos:"сноска", ru:"составлять, занимать (долю/процент, ГРАМ.5)", ex:"莫斯科人口占俄罗斯人口的9.5%左右。"},
+  {id:105, cat:"notes", hz:"过奖", py:"guòjiǎng", pos:"сноска", ru:"перехваливать (К.4: 您过奖了)"},
+
+  // 4. СЛОВА ИЗ ТЕКСТОВ ВНЕ СЛОВАРЯ (106–127)
+  {id:106, cat:"extra", hz:"不好意思", py:"bù hǎoyìsi", pos:"из текста", ru:"извини, неудобно"},
+  {id:107, cat:"extra", hz:"久等", py:"jiǔ děng", pos:"из текста", ru:"долго ждать (让你久等了)"},
+  {id:108, cat:"extra", hz:"堵车", py:"dǔchē", pos:"из текста", ru:"пробка; стоять в пробке (难免堵车)"},
+  {id:109, cat:"extra", hz:"热闹", py:"rènao", pos:"из текста", ru:"оживлённый, шумный"},
+  {id:110, cat:"extra", hz:"传统", py:"chuántǒng", pos:"из текста", ru:"традиция; традиционный (传统美德)"},
+  {id:111, cat:"extra", hz:"年轻", py:"niánqīng", pos:"из текста", ru:"молодой"},
+  {id:112, cat:"extra", hz:"上班 / 下班", py:"shàngbān / xiàbān", pos:"из текста", ru:"идти на работу / с работы"},
+  {id:113, cat:"extra", hz:"办事儿", py:"bàn shìr", pos:"из текста", ru:"решать дела (出门办事儿)"},
+  {id:114, cat:"extra", hz:"原来如此", py:"yuánlái rúcǐ", pos:"из текста", ru:"вот оно что"},
+  {id:115, cat:"extra", hz:"国内 / 国外", py:"guónèi / guówài", pos:"из текста", ru:"внутри страны / за рубежом"},
+  {id:116, cat:"extra", hz:"公路", py:"gōnglù", pos:"из текста", ru:"шоссе"},
+  {id:117, cat:"extra", hz:"立交桥", py:"lìjiāoqiáo", pos:"из текста", ru:"транспортная развязка, эстакада"},
+  {id:118, cat:"extra", hz:"现代", py:"xiàndài", pos:"из текста", ru:"современный (现代机场)"},
+  {id:119, cat:"extra", hz:"机场", py:"jīchǎng", pos:"из текста", ru:"аэропорт"},
+  {id:120, cat:"extra", hz:"可不是嘛", py:"kě bú shì ma", pos:"из текста", ru:"а как же! ещё бы!"},
+  {id:121, cat:"extra", hz:"搬进", py:"bānjìn", pos:"из текста", ru:"въехать, переехать (в) (搬进了高楼)"},
+  {id:122, cat:"extra", hz:"有钱", py:"yǒu qián", pos:"из текста", ru:"богатый (越来越有钱)"},
+  {id:123, cat:"extra", hz:"省钱 / 花钱", py:"shěng qián / huā qián", pos:"из текста", ru:"экономить / тратить деньги"},
+  {id:124, cat:"extra", hz:"未来", py:"wèilái", pos:"из текста", ru:"будущее (花未来的钱)"},
+  {id:125, cat:"extra", hz:"服装", py:"fúzhuāng", pos:"из текста", ru:"одежда, костюм"},
+  {id:126, cat:"extra", hz:"另外", py:"lìngwài", pos:"из текста", ru:"кроме того"},
+  {id:127, cat:"extra", hz:"街上", py:"jiē shang", pos:"из текста", ru:"на улице"},
+
+  // 5. ТЕРМИНЫ ИЗ «ЗНАЕТЕ ЛИ ВЫ» (128–144)
+  {id:128, cat:"terms", hz:"文化大革命", py:"Wénhuà dà gémìng", pos:"термин", ru:"Культурная революция (1966–1976)"},
+  {id:129, cat:"terms", hz:"邓小平", py:"Dèng Xiǎopíng", pos:"термин", ru:"Дэн Сяопин (1904–1997)"},
+  {id:130, cat:"terms", hz:"有中国特色的社会主义", py:"yǒu Zhōngguó tèsè de shèhuìzhǔyì", pos:"термин", ru:"социализм с китайской спецификой"},
+  {id:131, cat:"terms", hz:"不管黑猫白猫，能捉老鼠的就是好猫", py:"bù guǎn hēi māo bái māo, néng zhuō lǎoshǔ de jiùshì hǎo māo", pos:"термин", ru:"неважно, чёрная кошка или белая, — хорошая та, что ловит мышей"},
+  {id:132, cat:"terms", hz:"市场经济", py:"shìchǎng jīngjì", pos:"термин", ru:"рыночная экономика"},
+  {id:133, cat:"terms", hz:"摸着石头过河", py:"mōzhe shítou guò hé", pos:"термин", ru:"переходить реку, нащупывая камни (действовать осторожно)"},
+  {id:134, cat:"terms", hz:"家庭联产承包责任制", py:"jiātíng liánchǎn chéngbāo zérèn zhì", pos:"термин", ru:"система семейного подряда"},
+  {id:135, cat:"terms", hz:"经济特区", py:"jīngjì tèqū", pos:"термин", ru:"особая экономическая зона (ОЭЗ)"},
+  {id:136, cat:"terms", hz:"深圳 / 珠海 / 香港", py:"Shēnzhèn / Zhūhǎi / Xiānggǎng", pos:"термин", ru:"Шэньчжэнь / Чжухай / Гонконг"},
+  {id:137, cat:"terms", hz:"治理整顿", py:"zhìlǐ zhěngdùn", pos:"термин", ru:"упорядочение и наведение порядка"},
+  {id:138, cat:"terms", hz:"沿海地区", py:"yánhǎi dìqū", pos:"термин", ru:"приморские районы"},
+  {id:139, cat:"terms", hz:"邓小平南方谈话", py:"Dèng Xiǎopíng nánfāng tánhuà", pos:"термин", ru:"речи Дэн Сяопина во время поездки на юг (1992)"},
+  {id:140, cat:"terms", hz:"邓小平理论", py:"Dèng Xiǎopíng lǐlùn", pos:"термин", ru:"теория Дэн Сяопина"},
+  {id:141, cat:"terms", hz:"科学发展观", py:"kēxué fāzhǎn guān", pos:"термин", ru:"научная концепция развития"},
+  {id:142, cat:"terms", hz:"环境保护 / 生态保护", py:"huánjìng bǎohù / shēngtài bǎohù", pos:"термин", ru:"охрана окружающей среды / экологии"},
+  {id:143, cat:"terms", hz:"促进社会和谐", py:"cùjìn shèhuì héxié", pos:"термин", ru:"содействовать гармонии в обществе"},
+  {id:144, cat:"terms", hz:"全面建设小康社会", py:"quánmiàn jiànshè xiǎokāng shèhuì", pos:"термин", ru:"всестороннее построение общества малого достатка"}
+];
+
+const traps = [
+  {ru:"оживлённое движение", right:"车水马龙", wrong:"车水码龙", hint:"马 (лошадь), без камня 石!"},
+  {ru:"ходить туда-сюда; общаться", right:"来往", wrong:"来主", hint:"往 с ключом шага 彳!"},
+  {ru:"главный, основной", right:"主要", wrong:"王要", hint:"Сверху точка — 主, а не 王!"},
+  {ru:"оживлённый, шумный", right:"热闹", wrong:"执闹", hint:"Внизу 4 точки огня 灬: 热!"},
+  {ru:"пробка на дороге", right:"堵车", wrong:"者车", hint:"Слева земля 土: 堵!"},
+  {ru:"традиция", right:"传统", wrong:"传充", hint:"Слева нить 纟: 统!"},
+  {ru:"скромный", right:"谦虚", wrong:"兼虚", hint:"Слева ключ речи 讠: 谦!"},
+  {ru:"бежать", right:"跑", wrong:"包", hint:"Слева нога ⻊: 跑!"},
+  {ru:"транспорт, сообщение", right:"交通", wrong:"交甬", hint:"С ключом движения 辶: 通!"},
+  {ru:"отсталый", right:"落后", wrong:"洛后", hint:"Сверху трава 艹: 落!"},
+  {ru:"инструмент, средство", right:"工具", wrong:"工俱", hint:"Без человека слева: 具!"},
+  {ru:"открытость (открывать)", right:"开放", wrong:"开方", hint:"Справа 攵: 放!"},
+  {ru:"экономика", right:"经济", wrong:"经齐", hint:"Слева вода 氵: 济!"},
+  {ru:"город", right:"城市", wrong:"成市", hint:"Слева земля 土: 城!"},
+  {ru:"облик, наружность", right:"面貌", wrong:"面貓", hint:"В 貌 слева 豸, это не кошка 猫!"},
+  {ru:"огромный", right:"巨大", wrong:"拒大", hint:"Без ключа руки 扌: 巨!"},
+  {ru:"не только", right:"不仅", wrong:"不又", hint:"Слева человек 亻: 仅!"},
+  {ru:"могучий и процветающий", right:"富强", wrong:"副强", hint:"富 (богатый), без ножа 刂!"},
+  {ru:"жизнь", right:"生活", wrong:"生舌", hint:"Слева три капли воды 氵: 活!"},
+  {ru:"расти, увеличиваться", right:"增长", wrong:"曾长", hint:"Слева земля 土: 增!"},
+  {ru:"например", right:"比如", wrong:"比女", hint:"Справа рот 口: 如!"},
+  {ru:"автомобиль", right:"汽车", wrong:"气车", hint:"Слева вода 氵: 汽!"},
+  {ru:"превратиться в", right:"变成", wrong:"变城", hint:"成 (становиться), без земли 土!"},
+  {ru:"обычное дело (простая еда)", right:"便饭", wrong:"更饭", hint:"Слева человек 亻: 便!"},
+  {ru:"брать кредит", right:"贷款", wrong:"代款", hint:"Снизу ракушка-деньги 贝: 贷!"},
+  {ru:"путешествовать (туризм)", right:"旅游", wrong:"方游", hint:"Полный иероглиф 旅, а не только 方!"},
+  {ru:"медовый месяц", right:"蜜月", wrong:"密月", hint:"Внизу насекомое/пчела 虫 (蜜), а не гора 山!"}
+];
+
+const liheDrills = [
+  {word:["住","院"], task:"«Врач сказал, ему придётся пролежать в больнице неделю»", right:"一周", wrong1:"院一周", wrong2:"了院一周", full:"医生说他得住【一周】院。"},
+  {word:["住","院"], task:"«С болезнью желудка я однажды лежал в больнице»", right:"过一次", wrong1:"院过一次", wrong2:"了一次过", full:"我得了胃病住【过一次】院。"},
+  {word:["贷","款"], task:"«Покупая квартиру, он взял немалый кредит»", right:"了不少", wrong1:"款了不少", wrong2:"不少了", full:"他买房子贷【了不少】款。"},
+  {word:["出","国"], task:"«Какая работа даёт частый шанс ездить за границу в командировки?»", right:"国出差", wrong1:"出差国", wrong2:"了国出差", full:"什么工作可以经常有出【国出差】的机会？"},
+  {word:["住","院"], task:"«Когда учитель Ли лёг в больницу?»", right:"的", wrong1:"院的", wrong2:"了院", full:"李老师什么时候住【的】院？"}
+];
+
+const beiDrills = [
+  {q:"最近半年物价上涨了三倍。 Во сколько раз выросли цены?", opts:["В 4 раза", "В 3 раза", "В 2 раза", "На 30%"], a:0, exp:"Глагол + 了 + N 倍 (до 10) = N+1: прибавилось 3 величины → стало в 4 раза больше!"},
+  {q:"你的包比我的大两倍。 Во сколько раз твоя сумка больше моей?", opts:["В 3 раза", "В 2 раза", "В 4 раза", "В 1.5 раза"], a:0, exp:"大两倍 = в 3 раза больше!"},
+  {q:"增加到两倍。 Как переводится с результативом 到?", opts:["Увеличиться в 2 раза", "Увеличиться в 3 раза", "Увеличиться на 2%", "Уменьшиться вдвое"], a:0, exp:"С 到 (增加到两倍) переводится по номиналу — достичь двукратного размера (в 2 раза)."},
+  {q:"Как правильно читается дробь ¾?", opts:["四分之三", "三分之四", "百分之三四", "四点三"], a:0, exp:"Сначала знаменатель, потом числитель: 四分之三!"},
+  {q:"Как правильно сказать «7 процентных пунктов»?", opts:["七个百分点", "七百分点", "百分之七点", "七点百分"], a:0, exp:"Перед 百分点 обязательно счётное слово 个!"},
+  {q:"В каком слове второй корень читается в ПЕРВОМ тоне?", opts:["马马虎虎 (mǎmǎhūhū)", "来来往往", "普普通通", "清清楚楚"], a:0, exp:"В 马马虎虎 вторая половина читается в 1-м тоне: mǎmǎhūhū!"},
+  {q:"Как меняются тоны в 不断 и 不仅?", opts:["búduàn (2+4) и bùjǐn (4+3)", "bùduàn и bújǐn", "búduàn и bújǐn", "bùduàn и bùjǐn"], a:0, exp:"Перед 4-м тоном 不 переходит во 2-й (búduàn), перед 3-м остаётся 4-м (bùjǐn)."}
+];
+
+const catNames = {
+  main: {label: "Основной (1–80)", cls: "cat-main"},
+  refill: {label: "Дозаправка (2.5)", cls: "cat-refill"},
+  notes: {label: "Сноски (2.6)", cls: "cat-notes"},
+  extra: {label: "Вне словаря (3.1)", cls: "cat-extra"},
+  terms: {label: "Знаете ли вы (3.2)", cls: "cat-terms"}
+};
+
+let learnedIds = safeGet('lesson24_full_learned', []);
+let bonusGdp = Number(safeGet('lesson24_full_gdp', 0)) || 0;
+
+function speak(text) {
+  try {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const clean = String(text).replace(/…|\/|（|）|\(|\)/g, ' ');
+    const u = new SpeechSynthesisUtterance(clean);
+    u.lang = 'zh-CN';
+    u.rate = 0.9;
+    window.speechSynthesis.speak(u);
+  } catch (e) {}
+}
+
+function updateCityDashboard() {
+  const count = learnedIds.length;
+  document.getElementById('learnedCount').textContent = count;
+  const pct = Math.round((count / words.length) * 100);
+  document.getElementById('progressBar').style.width = pct + '%';
+  
+  const totalGdp = (count * 0.1 + bonusGdp).toFixed(1);
+  document.getElementById('gdpScore').textContent = '+' + totalGdp + '%';
+
+  const yearEl = document.getElementById('eraYear');
+  const titleEl = document.getElementById('eraTitle');
+  const descEl = document.getElementById('eraDesc');
+  const visEl = document.getElementById('cityVisual');
+
+  if (count < 30) {
+    yearEl.textContent = '1978';
+    titleEl.textContent = 'Начало реформ (改革开放)';
+    descEl.textContent = '家庭联产承包责任制, 平房, 自行车 — старт модернизации';
+    visEl.textContent = '🏚️🚲🌾👕';
+  } else if (count < 75) {
+    yearEl.textContent = '1992';
+    titleEl.textContent = 'Южное турне и ОЭЗ (南方谈话 / 经济特区)';
+    descEl.textContent = 'Шэньчжэнь и Чжухай растут, строятся 高楼, 公路 и 市场经济!';
+    visEl.textContent = '🏢🚌🏗️👔';
+  } else if (count < 120) {
+    yearEl.textContent = '2010';
+    titleEl.textContent = 'Экономический бум (迅速发展)';
+    descEl.textContent = '车水马龙, 贷款买房, 出国观光 — обычное дело (家常便饭)!';
+    visEl.textContent = '🏙️🚗✈️🛍️';
+  } else {
+    yearEl.textContent = '2026';
+    titleEl.textContent = 'Всесторонний достаток (全面建设小康社会)';
+    descEl.textContent = '高铁, 立交桥, 富强! Все 127 слов и 17 терминов у тебя в кармане!';
+    visEl.textContent = '🌆🚄🌉🚀';
+  }
+}
+
+function addGdp(val) {
+  bonusGdp += val;
+  safeSet('lesson24_full_gdp', bonusGdp);
+  updateCityDashboard();
+}
+
+function renderWords() {
+  const q = (document.getElementById('searchInput').value || '').toLowerCase();
+  const f = document.getElementById('filterSelect').value;
+  const grid = document.getElementById('wordGrid');
+  
+  const filtered = words.filter(w => {
+    const matchQ = w.hz.toLowerCase().includes(q) || w.py.toLowerCase().includes(q) || w.ru.toLowerCase().includes(q);
+    if (!matchQ) return false;
+    if (['main','refill','notes','extra','terms'].includes(f)) return w.cat === f;
+    if (f === 'unlearned') return !learnedIds.includes(w.id);
+    if (f === 'learned') return learnedIds.includes(w.id);
+    if (f === 'keys') return Boolean(w.key);
+    return true;
+  });
+
+  document.getElementById('countInfo').textContent = 'Показано карточек: ' + filtered.length + ' из ' + words.length;
+
+  grid.innerHTML = filtered.map(w => {
+    const isL = learnedIds.includes(w.id);
+    const cInfo = catNames[w.cat];
+    return '<div class="word-card ' + (isL ? 'learned' : '') + '" data-id="' + w.id + '">' +
+      '<div>' +
+        '<span class="cat-tag ' + cInfo.cls + '">' + cInfo.label + '</span>' +
+        '<div class="hanzi">' +
+          '<span>' + w.id + '. ' + w.hz + '</span>' +
+          '<span class="pos-tag">' + w.pos + '</span>' +
+        '</div>' +
+        '<div class="pinyin">' + w.py + '</div>' +
+        '<div class="meaning">' + w.ru + '</div>' +
+        (w.ex ? '<div style="font-size:0.8rem; color:#94a3b8; font-style:italic;">«' + w.ex + '»</div>' : '') +
+        (w.key ? '<div class="note-box">💡 ' + w.key + '</div>' : '') +
+      '</div>' +
+      '<div class="card-actions">' +
+        '<button class="btn-small" data-action="speak" data-id="' + w.id + '">🔊 Звук</button>' +
+        '<button class="btn-small btn-learn ' + (isL ? 'learned' : '') + '" data-action="learn" data-id="' + w.id + '">' +
+          (isL ? '✓ Выучено' : 'Запомнил') +
+        '</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// События карточек
+document.getElementById('wordGrid').addEventListener('click', function(e) {
+  const btn = e.target.closest('button');
+  const card = e.target.closest('.word-card');
+  if (!card) return;
+  const id = Number(card.getAttribute('data-id'));
+  const wordObj = words.find(x => x.id === id);
+  if (!wordObj) return;
+
+  if (btn && btn.getAttribute('data-action') === 'learn') {
+    if (learnedIds.includes(id)) {
+      learnedIds = learnedIds.filter(x => x !== id);
+    } else {
+      learnedIds.push(id);
+    }
+    safeSet('lesson24_full_learned', learnedIds);
+    renderWords();
+    updateCityDashboard();
+  } else {
+    speak(wordObj.hz);
+  }
+});
+
+document.getElementById('searchInput').addEventListener('input', renderWords);
+document.getElementById('filterSelect').addEventListener('change', renderWords);
+document.getElementById('blindBtn').addEventListener('click', function() {
+  document.getElementById('wordGrid').classList.toggle('blind-mode');
+});
+
+// Переключение вкладок
+document.getElementById('mainTabs').addEventListener('click', function(e) {
+  const btn = e.target.closest('.tab-btn');
+  if (!btn) return;
+  const tab = btn.getAttribute('data-tab');
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('#mainTabs .tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + tab).classList.add('active');
+  btn.classList.add('active');
+});
+
+// ИГРА 1: БЛИЦ
+let currentQuizTarget = null;
+function nextQuiz() {
+  const poolType = document.getElementById('quizPoolSelect').value;
+  const pool = poolType === 'all' ? words : words.filter(w => w.cat === poolType);
+  currentQuizTarget = pool[Math.floor(Math.random() * pool.length)];
+  const others = pool.filter(w => w.id !== currentQuizTarget.id).sort(() => 0.5 - Math.random()).slice(0, 3);
+  const opts = [currentQuizTarget, ...others].sort(() => 0.5 - Math.random());
+
+  document.getElementById('quizPrompt').textContent = currentQuizTarget.ru;
+  document.getElementById('quizSub').textContent = currentQuizTarget.ex
+    ? 'Контекст: ' + currentQuizTarget.ex.replace(currentQuizTarget.hz, '【...】')
+    : 'Раздел: ' + catNames[currentQuizTarget.cat].label;
+  document.getElementById('quizFeedback').textContent = '';
+
+  document.getElementById('quizOptions').innerHTML = opts.map(o =>
+    '<button class="opt-btn" data-id="' + o.id + '">' +
+      '<div style="font-weight:700;">' + o.hz + '</div>' +
+      '<div style="font-size:0.82rem; color:var(--muted);">' + o.py + '</div>' +
+    '</button>'
+  ).join('');
+}
+
+document.getElementById('quizOptions').addEventListener('click', function(e) {
+  const btn = e.target.closest('.opt-btn');
+  if (!btn || !currentQuizTarget) return;
+  const pickedId = Number(btn.getAttribute('data-id'));
+  const fb = document.getElementById('quizFeedback');
+  speak(currentQuizTarget.hz);
+  if (pickedId === currentQuizTarget.id) {
+    btn.classList.add('correct');
+    fb.style.color = 'var(--green)';
+    fb.textContent = '✓ Верно! ' + currentQuizTarget.hz + ' (' + currentQuizTarget.py + ')';
+    addGdp(0.2);
+  } else {
+    btn.classList.add('wrong');
+    fb.style.color = 'var(--accent)';
+    fb.textContent = '✗ Правильный ответ: ' + currentQuizTarget.hz + ' (' + currentQuizTarget.py + ')';
+  }
+});
+document.getElementById('quizPoolSelect').addEventListener('change', nextQuiz);
+document.getElementById('nextQuizBtn').addEventListener('click', nextQuiz);
+
+// ИГРА 2: 27 ЛОВУШЕК РТ 2.3
+let trapIdx = 0;
+let currentTrap = null;
+function nextTrap() {
+  const idx = trapIdx % traps.length;
+  currentTrap = traps[idx];
+  trapIdx++;
+  document.getElementById('trapCounter').textContent = (idx + 1) + ' / ' + traps.length;
+  document.getElementById('trapMeaning').textContent = 'Найди правильное написание: «' + currentTrap.ru + '»';
+  document.getElementById('trapFeedback').textContent = '';
+  const swap = Math.random() > 0.5;
+  const arr = swap
+    ? [{txt:currentTrap.right, ok:1}, {txt:currentTrap.wrong, ok:0}]
+    : [{txt:currentTrap.wrong, ok:0}, {txt:currentTrap.right, ok:1}];
+  
+  document.getElementById('trapOptions').innerHTML = arr.map(item =>
+    '<button class="opt-btn" style="font-size:2rem; font-weight:800;" data-ok="' + item.ok + '">' + item.txt + '</button>'
+  ).join('');
+}
+
+document.getElementById('trapOptions').addEventListener('click', function(e) {
+  const btn = e.target.closest('.opt-btn');
+  if (!btn || !currentTrap) return;
+  const ok = btn.getAttribute('data-ok') === '1';
+  const fb = document.getElementById('trapFeedback');
+  speak(currentTrap.right);
+  if (ok) {
+    btn.classList.add('correct');
+    fb.style.color = 'var(--green)';
+    fb.textContent = '✓ Точно! ' + currentTrap.hint;
+    addGdp(0.3);
+  } else {
+    btn.classList.add('wrong');
+    fb.style.color = 'var(--accent)';
+    fb.textContent = '✗ Ошибка РТ 2.3! ' + currentTrap.hint;
+  }
+});
+document.getElementById('nextTrapBtn').addEventListener('click', nextTrap);
+
+// ИГРА 3: ХИРУРГИЯ 离合词
+let liheIdx = 0;
+let currentLihe = null;
+function nextLihe() {
+  currentLihe = liheDrills[liheIdx % liheDrills.length];
+  liheIdx++;
+  document.getElementById('liheTask').textContent = currentLihe.task;
+  document.getElementById('liheVisual').innerHTML = '<span>' + currentLihe.word[0] + '</span><span class="insert-zone">?</span><span>' + currentLihe.word[1] + '</span>';
+  document.getElementById('liheFeedback').textContent = '';
+  
+  const opts = [
+    {txt: currentLihe.word[0] + currentLihe.right + currentLihe.word[1], ok: 1},
+    {txt: currentLihe.word[0] + currentLihe.wrong1, ok: 0},
+    {txt: currentLihe.word[0] + currentLihe.wrong2, ok: 0}
+  ].sort(() => 0.5 - Math.random());
+
+  document.getElementById('liheOptions').innerHTML = opts.map(o =>
+    '<button class="opt-btn" data-ok="' + o.ok + '">' + o.txt + '</button>'
+  ).join('');
+}
+
+document.getElementById('liheOptions').addEventListener('click', function(e) {
+  const btn = e.target.closest('.opt-btn');
+  if (!btn || !currentLihe) return;
+  const ok = btn.getAttribute('data-ok') === '1';
+  const fb = document.getElementById('liheFeedback');
+  document.querySelector('.insert-zone').textContent = currentLihe.right;
+  speak(currentLihe.full.replace(/【|】/g, ''));
+  if (ok) {
+    btn.classList.add('correct');
+    fb.style.color = 'var(--green)';
+    fb.textContent = '✓ Идеально: ' + currentLihe.full;
+    addGdp(0.3);
+  } else {
+    btn.classList.add('wrong');
+    fb.style.color = 'var(--accent)';
+    fb.textContent = '✗ Разделяемое слово: ' + currentLihe.full;
+  }
+});
+document.getElementById('nextLiheBtn').addEventListener('click', nextLihe);
+
+// ИГРА 4: 倍 И ТОНЫ
+let beiIdx = 0;
+let currentBei = null;
+function nextBei() {
+  currentBei = beiDrills[beiIdx % beiDrills.length];
+  beiIdx++;
+  document.getElementById('beiPrompt').textContent = currentBei.q;
+  document.getElementById('beiFeedback').textContent = '';
+  
+  const indexed = currentBei.opts.map((txt, i) => ({txt, ok: i === currentBei.a ? 1 : 0})).sort(() => 0.5 - Math.random());
+  document.getElementById('beiOptions').innerHTML = indexed.map(o =>
+    '<button class="opt-btn" data-ok="' + o.ok + '">' + o.txt + '</button>'
+  ).join('');
+}
+
+document.getElementById('beiOptions').addEventListener('click', function(e) {
+  const btn = e.target.closest('.opt-btn');
+  if (!btn || !currentBei) return;
+  const ok = btn.getAttribute('data-ok') === '1';
+  const fb = document.getElementById('beiFeedback');
+  if (ok) {
+    btn.classList.add('correct');
+    fb.style.color = 'var(--green)';
+    fb.textContent = '✓ Верно! ' + currentBei.exp;
+    addGdp(0.3);
+  } else {
+    btn.classList.add('wrong');
+    fb.style.color = 'var(--accent)';
+    fb.textContent = '✗ Подловка! ' + currentBei.exp;
+  }
+});
+document.getElementById('nextBeiBtn').addEventListener('click', nextBei);
+
+// Запуск
+renderWords();
+updateCityDashboard();
+nextQuiz();
+nextTrap();
+nextLihe();
+nextBei();
+</script>
+</body>
+</html>
