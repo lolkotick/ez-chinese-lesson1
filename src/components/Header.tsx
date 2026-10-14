@@ -121,6 +121,15 @@ export const Header: React.FC<HeaderProps> = ({
             ))}
 
             <a
+              href="./lesson2.html"
+              className="px-3 py-1.5 rounded-lg whitespace-nowrap transition-all font-semibold bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white shadow-sm shadow-rose-900/40 flex items-center gap-1 hover:scale-105"
+              title="Перейти к интерактивному тренажёру Урока 2: 宴请 (43 + 33 слова)"
+            >
+              <span>Урок 2 (76)</span>
+              <span>➔</span>
+            </a>
+
+            <a
               href="./lesson24.html"
               className="px-3 py-1.5 rounded-lg whitespace-nowrap transition-all font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-sm shadow-indigo-900/40 flex items-center gap-1 hover:scale-105"
               title="Перейти к интерактивному тренажёру Урока 24 (144 слова + 17 терминов)"

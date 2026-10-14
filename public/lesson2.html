@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Урок 2: 宴请 — Деловой китайский (43 + 33 слова)</title>
+  <style>
+    :root {
+      --bg: #140c1c;
+      --card: #231631;
+      --card-hover: #332047;
+      --accent: #e11d48;
+      --gold: #f59e0b;
+      --green: #10b981;
+      --blue: #38bdf8;
+      --text: #fdf4ff;
+      --muted: #c084fc;
+      --border: #3b2554;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+    body { background: var(--bg); color: var(--text); line-height: 1.5; padding-bottom: 60px; }
+
+    /* Шапка симулятора банкета */
+    .banquet-banner {
+      background: linear-gradient(135deg, #2e102f, #140c1c);
+      border-bottom: 2px solid var(--border);
+      padding: 18px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+    }
+    .banquet-header {
+      max-width: 1150px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+    }
+    .stage-badge { display: flex; align-items: center; gap: 14px; }
+    .stage-step {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: var(--gold);
+      background: rgba(245, 158, 11, 0.15);
+      padding: 6px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--gold);
+      white-space: nowrap;
+    }
+    .table-visual {
+      font-size: 1.7rem;
+      letter-spacing: 6px;
+      background: rgba(255,255,255,0.05);
+      padding: 8px 16px;
+      border-radius: 12px;
+    }
+    .stats-bar { display: flex; gap: 22px; align-items: center; }
+    .stat-item { text-align: right; }
+    .stat-label { font-size: 0.72rem; color: #cbd5e1; text-transform: uppercase; }
+    .stat-val { font-size: 1.15rem; font-weight: 700; color: var(--gold); }
+
+    .progress-wrap {
+      max-width: 1150px;
+      margin: 12px auto 0;
+      background: var(--border);
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--gold), var(--green));
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    .container { max-width: 1150px; margin: 24px auto; padding: 0 16px; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+    .tab-btn {
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+    .tab-btn:hover { background: var(--card-hover); }
+    .tab-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; align-items: center; }
+    .search-input, .filter-select {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.92rem;
+    }
+    .search-input { flex: 1; min-width: 220px; }
+
+    .word-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(265px, 1fr));
+      gap: 14px;
+    }
+    .word-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      transition: 0.2s;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .word-card:hover { transform: translateY(-3px); border-color: var(--gold); }
+    .word-card.learned { border-color: var(--green); background: rgba(16, 185, 129, 0.08); }
+    .hanzi { font-size: 1.55rem; font-weight: 700; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .pinyin { color: var(--gold); font-size: 0.95rem; font-weight: 500; margin-bottom: 6px; }
+    .cat-tag { font-size: 0.68rem; padding: 2px 7px; border-radius: 4px; display: inline-block; margin-bottom: 6px; font-weight: 600; }
+    .cat-main { background: rgba(225,29,72,0.22); color: #fda4af; }
+    .cat-text { background: rgba(56,189,248,0.2); color: #7dd3fc; }
+    .cat-idiom { background: rgba(245,158,11,0.2); color: #fcd34d; }
+
+    .meaning { font-size: 0.94rem; color: #f1f5f9; margin-bottom: 8px; }
+    .note-box { font-size: 0.78rem; color: #cbd5e1; background: rgba(0,0,0,0.3); padding: 7px; border-radius: 6px; border-left: 3px solid var(--gold); margin-top: 6px; }
+    .card-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
+    .btn-small {
+      background: var(--border);
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.78rem;
+    }
+    .btn-small:hover { background: #4c306b; }
+    .btn-learn.learned { background: var(--green); }
+
+    .game-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 26px;
+      max-width: 800px;
+      margin: 0 auto 24px;
+      text-align: center;
+    }
+    .game-title { font-size: 1.35rem; margin-bottom: 8px; color: var(--gold); }
+    .game-sub { color: #cbd5e1; margin-bottom: 20px; font-size: 0.92rem; }
+    .big-prompt { font-size: 1.75rem; font-weight: 800; margin: 18px 0; color: white; }
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .opt-btn {
+      background: var(--bg);
+      border: 2px solid var(--border);
+      color: var(--text);
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 1.15rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .opt-btn:hover { border-color: var(--gold); background: var(--card-hover); }
+    .opt-btn.correct { border-color: var(--green); background: rgba(16,185,129,0.2); }
+    .opt-btn.wrong { border-color: var(--accent); background: rgba(225,29,72,0.25); }
+    .feedback { margin-top: 16px; font-weight: 600; min-height: 28px; }
+
+    .blind-mode .meaning, .blind-mode .pinyin { filter: blur(6px); transition: 0.2s; }
+    .blind-mode .word-card:hover .meaning, .blind-mode .word-card:hover .pinyin { filter: blur(0); }
+  </style>
+</head>
+<body>
+
+  <!-- ВЕРХНИЙ ДАШБОРД БАНКЕТА -->
+  <div class="banquet-banner">
+    <div class="banquet-header">
+      <div class="stage-badge">
+        <div style="display: flex; gap: 6px;">
+          <a href="./" style="text-decoration: none; color: #fdf4ff; font-size: 0.82rem; background: #3b2554; padding: 6px 12px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; border: 1px solid #5b3780;" title="Вернуться к Уроку 1">← Урок 1</a>
+          <a href="./lesson24.html" style="text-decoration: none; color: #fdf4ff; font-size: 0.82rem; background: #3b2554; padding: 6px 12px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; border: 1px solid #5b3780;" title="Перейти к Уроку 24">Урок 24 ➔</a>
+        </div>
+        <div class="stage-step" id="stageStep">Этап 1: 送请柬</div>
+        <div>
+          <div style="font-weight:700; font-size:1.05rem;" id="stageTitle">Вручение приглашения (Встреча делегации)</div>
+          <div style="font-size:0.82rem; color:#cbd5e1;" id="stageDesc">43 слова в лексике + 33 слова в текстах — проведи идеальный приём!</div>
+        </div>
+      </div>
+      <div class="table-visual" id="tableVisual" title="Атмосфера приёма">✉️🏨🤝🍵</div>
+      <div class="stats-bar">
+        <div class="stat-item">
+          <div class="stat-label">Освоено (43 + 33)</div>
+          <div class="stat-val"><span id="learnedCount">0</span> / 76</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Расположение гостей (盛情)</div>
+          <div class="stat-val" id="favorScore">100 очков</div>
+        </div>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-fill" id="progressBar"></div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="tabs" id="mainTabs">
+      <button class="tab-btn active" data-tab="dict">📚 Все 76 слов (43 + 33)</button>
+      <button class="tab-btn" data-tab="reg">🎩 Книжный регистр (14 пар)</button>
+      <button class="tab-btn" data-tab="etiquette">🥂 Симулятор банкета и Грамматика</button>
+      <button class="tab-btn" data-tab="lookalikes">🔍 Похожие иероглифы (12 групп)</button>
+      <button class="tab-btn" data-tab="tones">🎵 Тоны и Многочтения</button>
+    </div>
+
+    <!-- ВКЛАДКА 1: СЛОВАРЬ (43 + 33 = 76) -->
+    <div id="sec-dict" class="section active">
+      <div class="controls">
+        <input type="text" id="searchInput" class="search-input" placeholder="Поиск по иероглифу, пиньиню или переводу...">
+        <select id="filterSelect" class="filter-select">
+          <option value="all">Все 76 слов (43 生词 + 33 из текста)</option>
+          <option value="main">1. Основная лексика 生词 (43 слова)</option>
+          <option value="text">2. Слова из текста и упражнений (33 слова)</option>
+          <option value="idiom">Чэнъюи и поговорки урока</option>
+          <option value="keys">С разбором состава и ключей</option>
+          <option value="unlearned">Ещё не выученные</option>
+          <option value="learned">Выученные ✓</option>
+        </select>
+        <button class="tab-btn" id="blindBtn">👁️ Режим диктанта</button>
+      </div>
+      <div id="countInfo" style="font-size:0.85rem; color:#cbd5e1; margin-bottom:12px;"></div>
+      <div class="word-grid" id="wordGrid"></div>
+    </div>
+
+    <!-- ВКЛАДКА 2: КНИЖНЫЙ РЕГИСТР -->
+    <div id="sec-reg" class="section">
+      <div class="game-box">
+        <div class="game-title">🎩 Переводчик делового регистра (Раздел 1)</div>
+        <div class="game-sub">Замени разговорное слово на высокостильный книжный аналог из 2-го урока (<span id="regCounter">1 / 14</span>)</div>
+        <div id="regPrompt" class="big-prompt"></div>
+        <div id="regContext" style="color:#cbd5e1; margin-bottom:15px;"></div>
+        <div id="regOptions" class="options-grid"></div>
+        <div id="regFeedback" class="feedback"></div>
+        <button class="tab-btn" style="margin-top:16px;" id="nextRegBtn">Следующая пара →</button>
+      </div>
+    </div>
+
+    <!-- ВКЛАДКА 3: СИМУЛЯТОР БАНКЕТА, ИДИОМЫ И ГРАММАТИКА -->
+    <div id="sec-etiquette" class="section">
+      <div class="game-box">
+        <div class="game-title">🥂 Симулятор банкета: Этикет, Идиомы и Грамматика (不知…不, 感到, 趁, 稍, 不妨)</div>
+        <div class="game-sub">Выбери реплику, которая идеально подходит по протоколу и грамматике урока</div>
+        <div id="etiqPrompt" class="big-prompt" style="font-size:1.35rem; line-height:1.4;"></div>
+        <div id="etiqOptions" class="options-grid"></div>
+        <div id="etiqFeedback" class="feedback"></div>
+        <button class="tab-btn" style="margin-top:16px;" id="nextEtiqBtn">Следующая ситуация →</button>
+      </div>
+    </div>
+
+    <!-- ВКЛАДКА 4: ПОХОЖИЕ ИЕРОГЛИФЫ -->
+    <div id="sec-lookalikes" class="section">
+      <div class="game-box">
+        <div class="game-title">🔍 Детектор двойников: 12 групп похожих иероглифов (Раздел 4)</div>
+        <div class="game-sub">Не перепутай ключи в парах: 妨/访/纺, 赏/尝, 即/既, 忘/忙, 柬/束, 宴/安 и др. (<span id="lookCounter">1 / 15</span>)</div>
+        <div id="lookPrompt" class="big-prompt" style="font-size:1.5rem;"></div>
+        <div id="lookOptions" class="options-grid"></div>
+        <div id="lookFeedback" class="feedback"></div>
+        <button class="tab-btn" style="margin-top:16px;" id="nextLookBtn">Следующая ловушка →</button>
+      </div>
+    </div>
+
+    <!-- ВКЛАДКА 5: ТОНЫ И МНОГОЧТЕНИЯ -->
+    <div id="sec-tones" class="section">
+      <div class="game-box">
+        <div class="game-title">🎵 Ловушки тонов и многочтений (好, 不, 一, 稍, 调, 盛, 数)</div>
+        <div class="game-sub">Проверка правильного пиньиня и изменения тонов во 2-м уроке</div>
+        <div id="tonePrompt" class="big-prompt" style="font-size:1.55rem;"></div>
+        <div id="toneOptions" class="options-grid"></div>
+        <div id="toneFeedback" class="feedback"></div>
+        <button class="tab-btn" style="margin-top:16px;" id="nextToneBtn">Следующий вопрос →</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+function safeGet(key, fallback) {
+  try {
+    const val = window.localStorage.getItem(key);
+    return val !== null ? JSON.parse(val) : fallback;
+  } catch (e) { return fallback; }
+}
+function safeSet(key, val) {
+  try { window.localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+}
+
+// ПОЛНАЯ БАЗА: 43 СЛОВА В ЛЕКСИКЕ (生词) + 33 СЛОВА В ТЕКСТАХ И 专名 = 76 СЛОВ
+const words = [
+  // БЛОК 1: 43 СЛОВА В ЛЕКСИКЕ (生词, № 1–43)
+  {id:1, cat:"main", hz:"请柬", py:"qǐngjiǎn", ru:"приглашение, пригласительный билет", ex:"送请柬 — передача приглашения", key:"柬 = 束 + 八 (две черты внутри); не путать с 束!"},
+  {id:2, cat:"main", hz:"烤鸭", py:"kǎoyā", ru:"утка по-пекински", ex:"在北京烤鸭店设宴", key:"烤 = 火(огонь) + 考; 鸭 = 甲 + 鸟(птица)"},
+  {id:3, cat:"main", hz:"设宴", py:"shè yàn", ru:"устраивать банкет (книжн. от 请客吃饭)", ex:"张总经理打算明天晚上设宴", key:"В 宴 между крышей 宀 и женщиной 女 стоит солнце 日 (не путать с 安!)"},
+  {id:4, cat:"main", hz:"接风", py:"jiēfēng", ru:"устраивать приём в честь приезжего", ex:"为贵代表团接风洗尘", key:"Букв. «встретить ветер»"},
+  {id:5, cat:"main", hz:"洗尘", py:"xǐchén", ru:"устраивать приветственный ужин", ex:"接风洗尘 — смыть дорожную пыль", key:"尘 (пыль) = 小 (маленькая) + 土 (земля)"},
+  {id:6, cat:"main", hz:"客随主便", py:"kè suí zhǔ biàn", ru:"как будет удобно хозяину", ex:"客随主便，听从张总经理安排", idiom:true, key:"Букв. «гость следует удобству хозяина»"},
+  {id:7, cat:"main", hz:"听从", py:"tīngcóng", ru:"слушаться, следовать (указаниям)", ex:"听从张总经理安排"},
+  {id:8, cat:"main", hz:"届时", py:"jièshí", ru:"в назначенное время (книжн. от 到时候)", ex:"敬请各位届时光临", key:"届 = 尸 + 由"},
+  {id:9, cat:"main", hz:"盛情", py:"shèngqíng", ru:"радушие, большое гостеприимство", ex:"谢谢你们的盛情邀请", key:"盛 (shèng, 4 тон) = 成 + 皿; в значении «накладывать рис» читается chéng (盛饭)"},
+  {id:10, cat:"main", hz:"赏光", py:"shǎngguāng", ru:"удостоить своим присутствием (книжн. от 来)", ex:"您能赏光，我们也很荣幸", key:"В 赏 внизу рот 口 и раковина 贝 (не путать с 尝, где внизу 云!)"},
+  {id:11, cat:"main", hz:"费心", py:"fèixīn", ru:"хлопотать, утруждать себя", ex:"张总经理费心了！", key:"费 = 弗 + 贝 (раковина/деньги)"},
+  {id:12, cat:"main", hz:"度过", py:"dùguò", ru:"проводить (время)", ex:"一起度过一个愉快的夜晚"},
+  {id:13, cat:"main", hz:"夜晚", py:"yèwǎn", ru:"вечер, ночь", ex:"愉快而难忘的夜晚"},
+  {id:14, cat:"main", hz:"踏上", py:"tàshàng", ru:"ступить на", ex:"一踏上中国的土地，就受到热情接待", key:"踏 = 足 (нога) + 沓 (水 вода + 曰); с 一 читается yí tàshàng"},
+  {id:15, cat:"main", hz:"土地", py:"tǔdì", ru:"земля, территория", ex:"一踏上中国的土地"},
+  {id:16, cat:"main", hz:"全体", py:"quántǐ", ru:"весь, в полном составе", ex:"代表团全体成员"},
+  {id:17, cat:"main", hz:"感动", py:"gǎndòng", ru:"растроганный; растрогать", ex:"让我们深受感动"},
+  {id:18, cat:"main", hz:"成语", py:"chéngyǔ", ru:"чэнъюй, идиома", ex:"中国有一句成语"},
+  {id:19, cat:"main", hz:"好客", py:"hàokè", ru:"гостеприимный, хлебосольный", ex:"中国人从来都是热情好客的", key:"Внимание на тон: 好 здесь читается в 4-м тоне — hàokè («любить гостей»)!"},
+  {id:20, cat:"main", hz:"主贤客来勤", py:"zhǔ xián kè lái qín", ru:"к радушному хозяину гости ходят часто", ex:"叫“主贤客来勤”，是说主人好客", idiom:true, key:"贤 = вверху 臣/丨丨+又, внизу 贝; 勤 = 堇 + 力(сила)"},
+  {id:21, cat:"main", hz:"结交", py:"jiéjiāo", ru:"заводить дружбу, знакомиться", ex:"结交新朋友"},
+  {id:22, cat:"main", hz:"趁", py:"chèn", ru:"пользуясь (моментом), пока", ex:"大家趁热吃吧！", key:"趁 = 走 (идти) + 人 + 彡"},
+  {id:23, cat:"main", hz:"表示", py:"biǎoshì", ru:"выражать", ex:"对罗斯先生一行表示热烈欢迎"},
+  {id:24, cat:"main", hz:"即将", py:"jíjiāng", ru:"вот-вот, скоро (книжн. от 就要/快要)", ex:"为我们即将开始的友好合作，干杯！", key:"В 即 справа 卩 (не путать с 既, где справа 旡!)"},
+  {id:25, cat:"main", hz:"难忘", py:"nánwàng", ru:"незабываемый", ex:"愉快而难忘的夜晚", key:"忘 (забыть) = 亡 + 心 внизу; не путать с 忙 (занят, 忄слева)"},
+  {id:26, cat:"main", hz:"好汉", py:"hǎohàn", ru:"молодец, настоящий мужчина", ex:"不到长城非好汉 / 非当好汉不可", key:"Здесь 好 читается в 3-м тоне: hǎohàn!"},
+  {id:27, cat:"main", hz:"日程", py:"rìchéng", ru:"программа (визита), расписание", ex:"这是为贵代表团安排的日程，请过目", key:"程 = 禾 (колос) + 呈"},
+  {id:28, cat:"main", hz:"稍", py:"shāo", ru:"немного, слегка", ex:"日程安排能不能稍作调整？", key:"Чтение: 1-й тон shāo! Слева колос 禾 (не путать с водой в 消!)"},
+  {id:29, cat:"main", hz:"调整", py:"tiáozhěng", ru:"корректировать, изменять", ex:"稍作调整 — немного скорректировать", key:"调 (tiáo) = 讠+ 周; 整 = 束 + 攵 + 正"},
+  {id:30, cat:"main", hz:"产品", py:"chǎnpǐn", ru:"продукция, изделие", ex:"看了产品生产过程后再进行谈判"},
+  {id:31, cat:"main", hz:"生产", py:"shēngchǎn", ru:"производить; производство", ex:"产品生产过程"},
+  {id:32, cat:"main", hz:"过程", py:"guòchéng", ru:"процесс, ход", ex:"看了产品生产过程后再进行谈判", key:"程 = 禾 + 呈"},
+  {id:33, cat:"main", hz:"心里有数", py:"xīnlǐ yǒushù", ru:"ясно представлять себе положение дел", ex:"这样，好心里有数", idiom:true, key:"Букв. «в сердце есть счёт»; 数 здесь читается shù (4 тон)"},
+  {id:34, cat:"main", hz:"组织", py:"zǔzhī", ru:"организовывать; организация", ex:"能否组织我们访问几家服装店老板？"},
+  {id:35, cat:"main", hz:"访问", py:"fǎngwèn", ru:"посещать, наносить визит", ex:"组织我们访问几家服装店老板", key:"访 с ключом речи 讠(не путать с 妨 и 纺!)"},
+  {id:36, cat:"main", hz:"服装", py:"fúzhuāng", ru:"одежда", ex:"访问几家服装店老板", key:"装 = 壮 + 衣 (одежда внизу)"},
+  {id:37, cat:"main", hz:"思想", py:"sīxiǎng", ru:"мысль, идея, подход", ex:"了解他们的经营思想"},
+  {id:38, cat:"main", hz:"满足", py:"mǎnzú", ru:"удовлетворять; довольный", ex:"我从来没有感到过这么满足"},
+  {id:39, cat:"main", hz:"不妨", py:"bùfáng", ru:"не мешает, можно (бы) (мягкий совет)", ex:"你们不妨先做他们的顾客", key:"妨 с ключом женщины 女 («помеха»); читается bùfáng (4+2 тон)"},
+  {id:40, cat:"main", hz:"采访", py:"cǎifǎng", ru:"брать интервью, опрашивать", ex:"然后再进行采访", key:"采 без травы сверху (с травой 艹 будет 菜 — овощи!)"},
+  {id:41, cat:"main", hz:"不入虎穴，焉得虎子", py:"búrù-hǔxué, yāndé-hǔzǐ", ru:"без риска нет результата (не войдя в логово тигра, не добыть тигрёнка)", ex:"“不入虎穴，焉得虎子”嘛！", idiom:true, key:"不入 читается búrù; 焉 = 怎么 (как); 穴 (пещера) без 工 внизу (с 工 будет 空)"},
+  {id:42, cat:"main", hz:"不愧", py:"búkuì", ru:"по праву, недаром", ex:"罗斯先生不愧是中国通", key:"Читается búkuì (2+4 тон); 愧 = 忄(сердце) + 鬼"},
+  {id:43, cat:"main", hz:"中国通", py:"Zhōngguó tōng", ru:"знаток Китая", ex:"罗斯先生不愧是中国通", idiom:true},
+
+  // БЛОК 2: 33 СЛОВА ИЗ ТЕКСТА, УПРАЖНЕНИЙ И 专名 (№ 44–76)
+  {id:44, cat:"text", hz:"长城", py:"Chángchéng", ru:"Великая Китайская стена (专名)", ex:"不到长城非好汉 — не побывал на Стене — не молодец"},
+  {id:45, cat:"text", hz:"请帖", py:"qǐngtiě", ru:"пригласительный билет (синоним 请柬)", ex:"五天前发出的请帖收到了不？"},
+  {id:46, cat:"text", hz:"敬请", py:"jìngqǐng", ru:"почтительно просить (книжн. от 请)", ex:"敬请各位届时光临"},
+  {id:47, cat:"text", hz:"光临", py:"guānglín", ru:"почтить своим присутствием (книжн. от 来)", ex:"再次感谢各位光临"},
+  {id:48, cat:"text", hz:"荣幸", py:"róngxìng", ru:"честь; польщённый", ex:"我们感到十分荣幸"},
+  {id:49, cat:"text", hz:"宾馆", py:"bīnguǎn", ru:"гостиница", ex:"我们开车到宾馆来接你们"},
+  {id:50, cat:"text", hz:"入席", py:"rùxí", ru:"занять место за столом", ex:"请入席吧！ — Прошу к столу!"},
+  {id:51, cat:"text", hz:"宴会", py:"yànhuì", ru:"банкет, званый ужин", ex:"为我们举行这个宴会", key:"В 宴 внутри солнце 日 (宀 + 日 + 女)"},
+  {id:52, cat:"text", hz:"真诚", py:"zhēnchéng", ru:"искренний", ex:"请接受我和我的朋友们的真诚感谢"},
+  {id:53, cat:"text", hz:"周到", py:"zhōudào", ru:"внимательный, продуманный", ex:"受到你们热情周到的接待"},
+  {id:54, cat:"text", hz:"宾至如归", py:"bīn zhì rú guī", ru:"гостям как дома", ex:"让客人有宾至如归的感觉", idiom:true, key:"Букв. «гость прибывает, будто вернулся домой»"},
+  {id:55, cat:"text", hz:"如同", py:"rútóng", ru:"как, подобно (книжн. от 像)", ex:"来了就如同到了家"},
+  {id:56, cat:"text", hz:"引来", py:"yǐnlái", ru:"привлекать", ex:"引来八方贵客"},
+  {id:57, cat:"text", hz:"八方", py:"bāfāng", ru:"все стороны (отовсюду)", ex:"四面八方 — со всех сторон"},
+  {id:58, cat:"text", hz:"举杯", py:"jǔbēi", ru:"поднимать бокал", ex:"请允许我举杯"},
+  {id:59, cat:"text", hz:"一行", py:"yìxíng", ru:"группа (сопровождающие лица, делегация)", ex:"对罗斯先生一行表示热烈欢迎", key:"Книжн. от 同来的人; читается yìxíng (4+2 тон)"},
+  {id:60, cat:"text", hz:"热烈", py:"rèliè", ru:"горячий, бурный (о приветствии)", ex:"表示热烈欢迎"},
+  {id:61, cat:"text", hz:"干杯", py:"gānbēi", ru:"выпить до дна; «за…!»", ex:"为我们即将开始的友好合作，干杯！"},
+  {id:62, cat:"text", hz:"不周", py:"bùzhōu", ru:"недосмотр, неучтивость, упущение", ex:"如有不周的地方，请原谅", key:"Читается bùzhōu (4+1 тон)"},
+  {id:63, cat:"text", hz:"原谅", py:"yuánliàng", ru:"прощать, извинять", ex:"如有不周的地方，请原谅"},
+  {id:64, cat:"text", hz:"幽默", py:"yōumò", ru:"юмор; остроумный", ex:"罗斯先生真幽默"},
+  {id:65, cat:"text", hz:"过目", py:"guòmù", ru:"просмотреть, ознакомиться (книжн. от 看一看)", ex:"这是为贵代表团安排的日程，请过目"},
+  {id:66, cat:"text", hz:"谈判", py:"tánpàn", ru:"переговоры", ex:"看了产品生产过程后再进行谈判"},
+  {id:67, cat:"text", hz:"有关", py:"yǒuguān", ru:"соответствующий, имеющий отношение", ex:"先参观有关工厂"},
+  {id:68, cat:"text", hz:"能否", py:"néngfǒu", ru:"можно ли (книжн. от 能不能)", ex:"能否组织我们访问几家服装店老板？"},
+  {id:69, cat:"text", hz:"老板", py:"lǎobǎn", ru:"владелец, хозяин, босс", ex:"我感到这个老板很有头脑"},
+  {id:70, cat:"text", hz:"顾客", py:"gùkè", ru:"покупатель, клиент", ex:"你们不妨先做他们的顾客"},
+  {id:71, cat:"text", hz:"品尝", py:"pǐncháng", ru:"пробовать (на вкус), дегустировать", ex:"我品尝了南方的风味小吃", key:"В 尝 внизу облако 云 (не путать с 赏!)"},
+  {id:72, cat:"text", hz:"风味小吃", py:"fēngwèi xiǎochī", ru:"местные закуски, фирменные блюда", ex:"趁去中国南方旅行的机会，我品尝了南方的风味小吃"},
+  {id:73, cat:"text", hz:"俗话", py:"súhuà", ru:"поговорка", ex:"中国有句俗话叫“不到长城非好汉”"},
+  {id:74, cat:"text", hz:"头脑", py:"tóunǎo", ru:"голова (ум, деловая смекалка)", ex:"我感到这个老板很有头脑"},
+  {id:75, cat:"text", hz:"不妙", py:"búmiào", ru:"плохо, неладно, скверно", ex:"我感到事情有点儿不妙", key:"Читается búmiào (2+4 тон)"},
+  {id:76, cat:"text", hz:"喜悦", py:"xǐyuè", ru:"радость", ex:"他感到了成功的喜悦"}
+];
+
+// 14 ПАР КНИЖНОГО РЕГИСТРА (Раздел 1 конспекта)
+const regPairs = [
+  {neutral:"到时候 (в назначенное время)", book:"届时", ex:"敬请各位【届时】光临", wrong:["当时","何时","准时"]},
+  {neutral:"请客吃饭 (устроить банкет)", book:"设宴", ex:"在北京烤鸭店【设宴】", wrong:["吃饭","请帖","入席"]},
+  {neutral:"请 (вежливо просим)", book:"敬请", ex:"【敬请】各位届时光临", wrong:["听从","有请","邀请"]},
+  {neutral:"来 (прийти — о госте)", book:"光临 / 赏光", ex:"您能【赏光】，我们也很荣幸", wrong:["到达","来往","访问"]},
+  {neutral:"像 (как, словно)", book:"如同", ex:"来了就【如同】到了家", wrong:["比如","好似","相同"]},
+  {neutral:"同来的人 (сопровождающие лица / делегация)", book:"一行", ex:"对罗斯先生【一行】表示热烈欢迎", wrong:["全体","一起","八方"]},
+  {neutral:"就要、快要 (вот-вот, скоро)", book:"即将", ex:"我们【即将】开始的友好合作", wrong:["马上","既然","届时"]},
+  {neutral:"如果有 (если имеется)", book:"如有", ex:"【如有】不周的地方，请原谅", wrong:["要是","比如","能否"]},
+  {neutral:"又 A 又 B (и приятный, и незабываемый)", book:"A 而 B", ex:"愉快【而】难忘的夜晚", wrong:["和","并","同"]},
+  {neutral:"不是 (не является)", book:"非", ex:"不到长城【非】好汉", wrong:["不","无","否"]},
+  {neutral:"看一看 (ознакомиться с документом)", book:"过目", ex:"这是为贵代表团安排的日程，请【过目】", wrong:["参观","访问","采访"]},
+  {neutral:"稍微调整一下 (немного скорректировать)", book:"稍作调整", ex:"日程安排能不能【稍作调整】？", wrong:["稍等一下","一点调整","作一调整"]},
+  {neutral:"能不能 (можно ли)", book:"能否", ex:"【能否】组织我们访问几家服装店老板？", wrong:["是否","好不","可不"]},
+  {neutral:"怎么、哪里 (как, каким образом)", book:"焉", ex:"不入虎穴，【焉】得虎子", wrong:["何","岂","哪"]}
+];
+
+// СИМУЛЯТОР БАНКЕТА (Этикет, Идиомы, Грамматика)
+const etiqDrills = [
+  {q:"Ван Ань спрашивает, удобно ли делегации прийти завтра на банкет: «不知你们方便不？» Как вежливо соглашается гость по этикету урока?", opts:["客随主便，听从张总经理安排", "不入虎穴，焉得虎子", "如有不周的地方，请原谅", "不到长城非好汉"], a:0, exp:"Гость соглашается с планом хозяина: 客随主便 («гость следует удобству хозяина»)!"},
+  {q:"Каким чэнъюем называется приветственный банкет в честь только что прибывших издалека гостей?", opts:["接风洗尘", "宾至如归", "主贤客来勤", "心里有数"], a:0, exp:"接风洗尘 — букв. «встретить ветер, смыть дорожную пыль»."},
+  {q:"Гость говорит: «У вас в Китае мы чувствуем себя как дома!» Какой чэнъюй для этого используется?", opts:["宾至如归", "主贤客来勤", "客随主便", "入乡随俗"], a:0, exp:"宾至如归 — «гость прибывает, как будто вернулся домой»."},
+  {q:"Подают горячую пекинскую утку. Что говорит хозяин гостям с предлогом 趁?", opts:["大家趁热吃吧！", "大家稍作吃吧！", "大家不妨过目吧！", "大家敬请吃吧！"], a:0, exp:"趁热吃 — «ешьте, пока горячее!»"},
+  {q:"В конце банкета гендиректор Чжан ритуально извиняется за возможные упущения. Какую фразу он произносит?", opts:["如有不周的地方，请原谅。", "那就太麻烦你们了。", "张总经理费心了。", "请接受我们的真诚感谢。"], a:0, exp:"Формула хозяина в конце банкета: 如有不周的地方，请原谅 («если в чём-то был недосмотр, прошу извинить»)."},
+  {q:"Росс хочет сначала осмотреть цеха фабрики, чтобы перед переговорами ясно представлять себе ситуацию. Какой оборот он использует?", opts:["这样，好心里有数。", "这样，主贤客来勤。", "这样，客随主便。", "这样，宾至如归。"], a:0, exp:"心里有数 — ясно представлять себе положение дел («в сердце есть счёт»)."},
+  {q:"Ван Ань даёт мягкий совет сначала зайти в магазины под видом обычных покупателей. Какое наречие используется для мягкого совета?", opts:["不妨 (你们不妨先做他们的顾客)", "不愧 (你们不愧先做顾客)", "难免 (你们难免先做顾客)", "即将 (你们即将先做顾客)"], a:0, exp:"不妨 — «не мешало бы, можно бы» (мягкий совет)."},
+  {q:"Переведи вежливый вопрос по модели 不知……不: «Получили ли вы приглашение, отправленное 5 дней назад?»", opts:["五天前发出的请帖，不知你们收到了不？", "不知五天前请帖收到没有不？", "五天前的请帖，不妨收到了不？", "五天前发出的请帖，稍收到了不？"], a:0, exp:"Если действие уже совершено, перед 不 ставится 了: 不知……收到了不？"}
+];
+
+// 12 ГРУПП ПОХОЖИХ ИЕРОГЛИФОВ (Раздел 4)
+const lookDrills = [
+  {q:"Выбери правильный иероглиф для слова «не мешает, можно бы» (bùfáng):", opts:["不妨 (с ключом женщины 女)", "不访 (с ключом речи 讠)", "不纺 (с ключом нити 纟)"], a:0, exp:"妨 (помеха) пишется с 女; 访 (визит/интервью) — с 讠; 纺 (прясть/текстиль) — с 纟!"},
+  {q:"Выбери правильное написание для «брать интервью» и «наносить визит»:", opts:["采访 и 访问 (оба с 讠)", "采妨 и 妨问 (оба с 女)", "菜访 и 纺问"], a:0, exp:"И интервью (采访), и визит (访问) связаны с речью — ключ 讠!"},
+  {q:"Различи 赏 и 尝: как правильно написать «удостоить присутствием» и «пробовать блюда»?", opts:["赏光 (внизу 贝) и 品尝 (внизу 云)", "尝光 (внизу 云) и 品赏 (внизу 贝)", "赏光 и 品常"], a:0, exp:"В 赏光 («даровать свет») внизу раковина-деньги 贝, а в 品尝 (пробовать на вкус) внизу облако 云!"},
+  {q:"Различи 即 и 既: как пишется «вот-вот, вскоре» (jíjiāng)?", opts:["即将 (справа 卩)", "既将 (справа 旡)", "即然"], a:0, exp:"即将 пишется через 即, а 既然 («раз уж») — через 既!"},
+  {q:"Различи 忘 и 忙: как пишется «незабываемый вечер»?", opts:["难忘 (внизу сердце 心)", "难忙 (слева сердце 忄)", "难妄"], a:0, exp:"忘 (забывать) = 亡 + 心 внизу; 忙 (занятой) = 忄слева."},
+  {q:"Различи 柬 и 束: как пишется «пригласительный билет» (qǐngjiǎn)?", opts:["请柬 (внутри две черты 八)", "请束 (без черт внутри)", "请拣"], a:0, exp:"柬 = 束 + две черты внутри!"},
+  {q:"Различи 宴 и 安: как пишется «устраивать банкет» (shè yàn)?", opts:["设宴 (внутри солнце 日: 宀+日+女)", "设安 (без солнца внутри)", "设晏"], a:0, exp:"В 宴 (банкет) под крышей 宀 обязательно стоит солнце 日 и женщина 女!"},
+  {q:"Различи 采 и 菜: как пишется «брать интервью» (cǎifǎng)?", opts:["采访 (без травы сверху)", "菜访 (с травой 艹 сверху)", "彩访"], a:0, exp:"采 — собирать (информацию); с травой 艹 получается 菜 — овощи/блюдо!"},
+  {q:"Различи 穴 и 空: как пишется «логово тигра» в Не войдя в логово тигра (hǔxué)?", opts:["虎穴 (без 工 внизу)", "虎空 (с 工 внизу)", "虎究"], a:0, exp:"穴 — пещера, нора, логово; 空 — пустой/небо."},
+  {q:"Различи 愧 и 鬼: как пишется «по праву, недаром» (búkuì)?", opts:["不愧 (слева сердце 忄)", "不鬼 (без ключа слева)", "不槐"], a:0, exp:"愧 (стыдиться; в 不愧 — «не стыдно назваться / по праву») = 忄 + 鬼."},
+  {q:"Различи 装 и 壮: как пишется «одежда» (fúzhuāng)?", opts:["服装 (внизу одежда 衣)", "服壮 (без одежды внизу)", "服妆"], a:0, exp:"装 = 壮 + 衣 (одежда внизу)!"},
+  {q:"Различи 稍 и 消: как пишется «немного скорректировать» (shāo zuò tiáozhěng)?", opts:["稍作调整 (слева колос 禾)", "消作调整 (слева вода 氵)", "梢作调整 (слева дерево 木)"], a:0, exp:"В наречии 稍 (немного) слева ключ зерна/колоса 禾!"}
+];
+
+// ЛОВУШКИ ТОНОВ И МНОГОЧТЕНИЙ (Раздел 4)
+const toneDrills = [
+  {q:"Как правильно читаются слова 好客 (гостеприимный) и 好汉 (молодец)?", opts:["hàokè (4 тон) и hǎohàn (3 тон)", "hǎokè (3 тон) и hàohàn (4 тон)", "оба в 3-м тоне: hǎokè, hǎohàn", "оба в 4-м тоне: hàokè, hàohàn"], a:0, exp:"В 好客 «любить гостей» — 4-й тон (hàokè), а в 好汉 «добрый молодец» — 3-й тон (hǎohàn)!"},
+  {q:"Где в словах с 不 тон меняется на ВТОРОЙ (bú)?", opts:["不入 (búrù), 不愧 (búkuì), 不妙 (búmiào)", "不周 (búzhōu), 不妨 (búfáng)", "Во всех словах читается bù", "Только в 不愧"], a:0, exp:"Перед 4-м тоном 不 переходит во 2-й: búrù, búkuì, búdào, búmiào. Перед 1-м и 2-м остаётся 4-м: bùzhōu, bùfáng!"},
+  {q:"Как читается 一 в словах 罗斯先生一行 и 一踏上?", opts:["yìxíng (4 тон) и yí tàshàng (2 тон)", "yīxíng и yī tàshàng", "yíxíng (2 тон) и yì tàshàng (4 тон)"], a:0, exp:"Перед 2-м тоном (行 xíng) 一 читается в 4-м тоне (yìxíng), а перед 4-м (踏 tà) — во 2-м (yí tàshàng)!"},
+  {q:"Как читается иероглиф 调 в 调整 (корректировать) и 调查 (исследовать)?", opts:["tiáozhěng (2 тон) и diàochá (4 тон)", "diàozhěng и tiáochá", "оба раза tiáo", "оба раза diào"], a:0, exp:"В 调整 (настраивать, корректировать) — tiáo, а в 调查 (расследовать) — diào!"},
+  {q:"Как читается 盛 в 盛情 (радушие) и 盛饭 (накладывать рис в пиалу)?", opts:["shèngqíng и chéngfàn", "chéngqíng и shèngfàn", "оба раза shèng"], a:0, exp:"В значении «обильный, пышный» — shèng (盛情), а как глагол «накладывать/черпать» — chéng (盛饭)!"},
+  {q:"В каком тоне читается наречие 稍 в 稍等一下 / 稍作调整?", opts:["1-й тон: shāo", "4-й тон: shào", "2-й тон: sháo", "3-й тон: shǎo"], a:0, exp:"В пекинской норме учебника 稍 читается в 1-м тоне: shāo!"},
+  {q:"Как читается 数 в выражении 心里有数 и в глаголе 数一数 (пересчитать)?", opts:["xīnlǐ yǒushù (4 тон) и shǔ yī shǔ (3 тон)", "xīnlǐ yǒushǔ (3 тон) и shù yī shù (4 тон)", "оба в 4-м тоне"], a:0, exp:"Существительное «счёт/число» — shù (4 тон, 心里有数), глагол «считать» — shǔ (3 тон)!"}
+];
+
+let learnedIds = safeGet('urok2_yanqing_learned', []);
+let favorPoints = Number(safeGet('urok2_yanqing_favor', 100)) || 100;
+
+function speak(text) {
+  try {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(String(text));
+    u.lang = 'zh-CN';
+    u.rate = 0.88;
+    window.speechSynthesis.speak(u);
+  } catch (e) {}
+}
+
+function updateBanquetDashboard() {
+  const count = learnedIds.length;
+  document.getElementById('learnedCount').textContent = count;
+  const pct = Math.round((count / words.length) * 100);
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('favorScore').textContent = (favorPoints + count * 5) + ' очков';
+
+  const stepEl = document.getElementById('stageStep');
+  const titleEl = document.getElementById('stageTitle');
+  const descEl = document.getElementById('stageDesc');
+  const visEl = document.getElementById('tableVisual');
+
+  if (count < 20) {
+    stepEl.textContent = 'Этап 1: 送请柬';
+    titleEl.textContent = 'Вручение приглашения (В гостинице 宾馆)';
+    descEl.textContent = 'Передаём 请柬, договариваемся о 接风洗尘 — 客随主便!';
+    visEl.textContent = '✉️🏨🤝🍵';
+  } else if (count < 45) {
+    stepEl.textContent = 'Этап 2: 宴会上';
+    titleEl.textContent = 'Банкет в ресторане утки по-пекински (设宴)';
+    descEl.textContent = '请入席! Гостям у нас 宾至如归, подаём 烤鸭 — 大家趁热吃吧!';
+    visEl.textContent = '🦆🥂🏮🍽️';
+  } else if (count < 68) {
+    stepEl.textContent = 'Этап 3: 宴会后';
+    titleEl.textContent = 'Обсуждение программы (日程 — 请过目)';
+    descEl.textContent = '稍作调整, осмотр 生产过程 перед 谈判 — 不入虎穴，焉得虎子!';
+    visEl.textContent = '📋🏭👔🔍';
+  } else {
+    stepEl.textContent = 'Финал: 中国通';
+    titleEl.textContent = 'Триумф дипломатии (不愧是中国通!)';
+    descEl.textContent = 'Все 76 слов (43 + 33) освоены! Контракт и дружба заключены!';
+    visEl.textContent = '🏆🥂🐉🎉';
+  }
+}
+
+function addFavor(pts) {
+  favorPoints += pts;
+  safeSet('urok2_yanqing_favor', favorPoints);
+  updateBanquetDashboard();
+}
+
+function renderWords() {
+  const q = (document.getElementById('searchInput').value || '').toLowerCase();
+  const f = document.getElementById('filterSelect').value;
+  const grid = document.getElementById('wordGrid');
+
+  const filtered = words.filter(w => {
+    const matchQ = w.hz.toLowerCase().includes(q) || w.py.toLowerCase().includes(q) || w.ru.toLowerCase().includes(q);
+    if (!matchQ) return false;
+    if (f === 'main') return w.cat === 'main';
+    if (f === 'text') return w.cat === 'text';
+    if (f === 'idiom') return Boolean(w.idiom);
+    if (f === 'keys') return Boolean(w.key);
+    if (f === 'unlearned') return !learnedIds.includes(w.id);
+    if (f === 'learned') return learnedIds.includes(w.id);
+    return true;
+  });
+
+  document.getElementById('countInfo').textContent = 'Показано карточек: ' + filtered.length + ' из ' + words.length;
+
+  grid.innerHTML = filtered.map(w => {
+    const isL = learnedIds.includes(w.id);
+    const catLabel = w.cat === 'main' ? '生词 (1–43)' : 'Из текста (44–76)';
+    const catCls = w.idiom ? 'cat-idiom' : (w.cat === 'main' ? 'cat-main' : 'cat-text');
+    return '<div class="word-card ' + (isL ? 'learned' : '') + '" data-id="' + w.id + '">' +
+      '<div>' +
+        '<span class="cat-tag ' + catCls + '">' + (w.idiom ? 'Чэнъюй / Выражение' : catLabel) + '</span>' +
+        '<div class="hanzi">' +
+          '<span>' + w.id + '. ' + w.hz + '</span>' +
+        '</div>' +
+        '<div class="pinyin">' + w.py + '</div>' +
+        '<div class="meaning">' + w.ru + '</div>' +
+        (w.ex ? '<div style="font-size:0.8rem; color:#cbd5e1; font-style:italic;">«' + w.ex + '»</div>' : '') +
+        (w.key ? '<div class="note-box">💡 ' + w.key + '</div>' : '') +
+      '</div>' +
+      '<div class="card-actions">' +
+        '<button class="btn-small" data-action="speak">🔊 Озвучить</button>' +
+        '<button class="btn-small btn-learn ' + (isL ? 'learned' : '') + '" data-action="learn">' +
+          (isL ? '✓ Выучено' : 'Запомнил') +
+        '</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+document.getElementById('wordGrid').addEventListener('click', function(e) {
+  const btn = e.target.closest('button');
+  const card = e.target.closest('.word-card');
+  if (!card) return;
+  const id = Number(card.getAttribute('data-id'));
+  const wordObj = words.find(x => x.id === id);
+  if (!wordObj) return;
+
+  if (btn && btn.getAttribute('data-action') === 'learn') {
+    if (learnedIds.includes(id)) {
+      learnedIds = learnedIds.filter(x => x !== id);
+    } else {
+      learnedIds.push(id);
+    }
+    safeSet('urok2_yanqing_learned', learnedIds);
+    renderWords();
+    updateBanquetDashboard();
+  } else {
+    speak(wordObj.hz);
+  }
+});
+
+document.getElementById('searchInput').addEventListener('input', renderWords);
+document.getElementById('filterSelect').addEventListener('change', renderWords);
+document.getElementById('blindBtn').addEventListener('click', function() {
+  document.getElementById('wordGrid').classList.toggle('blind-mode');
+});
+
+document.getElementById('mainTabs').addEventListener('click', function(e) {
+  const btn = e.target.closest('.tab-btn');
+  if (!btn) return;
+  const tab = btn.getAttribute('data-tab');
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('#mainTabs .tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + tab).classList.add('active');
+  btn.classList.add('active');
+});
+
+// ИГРА 1: КНИЖНЫЙ РЕГИСТР
+let regIdx = 0;
+let curReg = null;
+function nextReg() {
+  const idx = regIdx % regPairs.length;
+  curReg = regPairs[idx];
+  regIdx++;
+  document.getElementById('regCounter').textContent = (idx + 1) + ' / ' + regPairs.length;
+  document.getElementById('regPrompt').textContent = 'Нейтрально: «' + curReg.neutral + '»';
+  document.getElementById('regContext').textContent = 'В диалоге: ' + curReg.ex.replace(curReg.book, '___');
+  document.getElementById('regFeedback').textContent = '';
+
+  const opts = [{txt: curReg.book, ok: 1}, ...curReg.wrong.map(w => ({txt: w, ok: 0}))].sort(() => 0.5 - Math.random());
+  document.getElementById('regOptions').innerHTML = opts.map(o =>
+    '<button class="opt-btn" data-ok="' + o.ok + '">' + o.txt + '</button>'
+  ).join('');
+}
+document.getElementById('regOptions').addEventListener('click', function(e) {
+  const btn = e.target.closest('.opt-btn');
+  if (!btn || !curReg) return;
+  const ok = btn.getAttribute('data-ok') === '1';
+  const fb = document.getElementById('regFeedback');
+  speak(curReg.book.split('/')[0]);
+  if (ok) {
+    btn.classList.add('correct');
+    fb.style.color = 'var(--green)';
+    fb.textContent = '✓ Высокий стиль соблюдён: ' + curReg.ex;
+    addFavor(10);
+  } else {
+    btn.classList.add('wrong');
+    fb.style.color = 'var(--accent)';
+    fb.textContent = '✗ В книжном регистре нужно: ' + curReg.book;
+  }
+});
+document.getElementById('nextRegBtn').addEventListener('click', nextReg);
+
+// ИГРА 2: СИМУЛЯТОР БАНКЕТА
+let etiqIdx = 0;
+let curEtiq = null;
+function nextEtiq() {
+  curEtiq = etiqDrills[etiqIdx % etiqDrills.length];
+  etiqIdx++;
+  document.getElementById('etiqPrompt').textContent = curEtiq.q;
+  document.getElementById('etiqFeedback').textContent = '';
+  const opts = curEtiq.opts.map((txt, i) => ({txt, ok: i === curEtiq.a ? 1 : 0})).sort(() => 0.5 - Math.random());
+  document.getElementById('etiqOptions').innerHTML = opts.map(o =>
+    '<button class="opt-btn" data-ok="' + o.ok + '">' + o.txt + '</button>'
+  ).join('');
+}
+document.getElementById('etiqOptions').addEventListener('click', function(e) {
+  const btn = e.target.closest('.opt-btn');
+  if (!btn || !curEtiq) return;
+  const ok = btn.getAttribute('data-ok') === '1';
+  const fb = document.getElementById('etiqFeedback');
+  if (ok) {
+    btn.classList.add('correct');
+    fb.style.color = 'var(--green)';
+    fb.textContent = '✓ Безупречный этикет! ' + curEtiq.exp;
+    addFavor(15);
+  } else {
+    btn.classList.add('wrong');
+    fb.style.color = 'var(--accent)';
+    fb.textContent = '✗ Оплошность на приёме! ' + curEtiq.exp;
+  }
+});
+document.getElementById('nextEtiqBtn').addEventListener('click', nextEtiq);
+
+// ИГРА 3: ПОХОЖИЕ ИЕРОГЛИФЫ
+let lookIdx = 0;
+let curLook = null;
+function nextLook() {
+  const idx = lookIdx % lookDrills.length;
+  curLook = lookDrills[idx];
+  lookIdx++;
+  document.getElementById('lookCounter').textContent = (idx + 1) + ' / ' + lookDrills.length;
+  document.getElementById('lookPrompt').textContent = curLook.q;
+  document.getElementById('lookFeedback').textContent = '';
+  const opts = curLook.opts.map((txt, i) => ({txt, ok: i === curLook.a ? 1 : 0})).sort(() => 0.5 - Math.random());
+  document.getElementById('lookOptions').innerHTML = opts.map(o =>
+    '<button class="opt-btn" data-ok="' + o.ok + '">' + o.txt + '</button>'
+  ).join('');
+}
+document.getElementById('lookOptions').addEventListener('click', function(e) {
+  const btn = e.target.closest('.opt-btn');
+  if (!btn || !curLook) return;
+  const ok = btn.getAttribute('data-ok') === '1';
+  const fb = document.getElementById('lookFeedback');
+  if (ok) {
+    btn.classList.add('correct');
+    fb.style.color = 'var(--green)';
+    fb.textContent = '✓ Точно! ' + curLook.exp;
+    addFavor(10);
+  } else {
+    btn.classList.add('wrong');
+    fb.style.color = 'var(--accent)';
+    fb.textContent = '✗ Ловушка ключей! ' + curLook.exp;
+  }
+});
+document.getElementById('nextLookBtn').addEventListener('click', nextLook);
+
+// ИГРА 4: ТОНЫ И МНОГОЧТЕНИЯ
+let toneIdx = 0;
+let curTone = null;
+function nextTone() {
+  curTone = toneDrills[toneIdx % toneDrills.length];
+  toneIdx++;
+  document.getElementById('tonePrompt').textContent = curTone.q;
+  document.getElementById('toneFeedback').textContent = '';
+  const opts = curTone.opts.map((txt, i) => ({txt, ok: i === curTone.a ? 1 : 0})).sort(() => 0.5 - Math.random());
+  document.getElementById('toneOptions').innerHTML = opts.map(o =>
+    '<button class="opt-btn" data-ok="' + o.ok + '">' + o.txt + '</button>'
+  ).join('');
+}
+document.getElementById('toneOptions').addEventListener('click', function(e) {
+  const btn = e.target.closest('.opt-btn');
+  if (!btn || !curTone) return;
+  const ok = btn.getAttribute('data-ok') === '1';
+  const fb = document.getElementById('toneFeedback');
+  if (ok) {
+    btn.classList.add('correct');
+    fb.style.color = 'var(--green)';
+    fb.textContent = '✓ Верно! ' + curTone.exp;
+    addFavor(10);
+  } else {
+    btn.classList.add('wrong');
+    fb.style.color = 'var(--accent)';
+    fb.textContent = '✗ Ошибка в чтении! ' + curTone.exp;
+  }
+});
+document.getElementById('nextToneBtn').addEventListener('click', nextTone);
+
+// Инициализация
+renderWords();
+updateBanquetDashboard();
+nextReg();
+nextEtiq();
+nextLook();
+nextTone();
+</script>
+</body>
+</html>
